@@ -1,0 +1,1861 @@
+<title>Language AI Story</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap');
+
+  :root{
+    --paper:#EAF0F3; --grid-line:#D5E0E4; --surface:#FFFFFF;
+    --ink:#142A38; --ink-soft:#4C6675; --rule:#C7D6DC;
+    --mark:#C93A1C; --mark-rgb:201,58,28;
+    --mark-soft: rgba(201,58,28,.10);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#0B141C; --grid-line:#182531; --surface:#121F29;
+      --ink:#DEE9EE; --ink-soft:#87A0AC; --rule:#22323D;
+      --mark:#FF7A50; --mark-rgb:255,122,80;
+      --mark-soft: rgba(255,122,80,.13);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0B141C; --grid-line:#182531; --surface:#121F29;
+    --ink:#DEE9EE; --ink-soft:#87A0AC; --rule:#22323D;
+    --mark:#FF7A50; --mark-rgb:255,122,80;
+    --mark-soft: rgba(255,122,80,.13);
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+  body{
+    margin:0; background-color:var(--paper); color:var(--ink);
+    background-image: radial-gradient(var(--grid-line) 1px, transparent 1px);
+    background-size: 24px 24px;
+    font-family:'Public Sans', system-ui, sans-serif;
+    font-size:15.5px; line-height:1.6;
+  }
+  code, .mono, input, textarea, button{ font-family:'JetBrains Mono', ui-monospace, monospace; }
+  h1,h2,h3{ font-family:'JetBrains Mono', ui-monospace, monospace; margin:0; text-wrap:balance; letter-spacing:-.01em; }
+  ::selection{ background:var(--mark-soft); color:var(--ink); }
+  a{ color:var(--ink); }
+  :focus-visible{ outline:2px solid var(--mark); outline-offset:2px; }
+
+  .shell{ max-width:1080px; margin:0 auto; padding:0 24px 100px; }
+
+  /* ---------- masthead ---------- */
+  .masthead{ padding:52px 0 34px; max-width:700px; }
+  .kicker{ font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--mark); font-weight:600; margin-bottom:14px; }
+  h1{ font-size:2.15rem; font-weight:700; }
+  .masthead p{ color:var(--ink-soft); font-size:1rem; max-width:60ch; margin:16px 0 0; }
+  .masthead .roadmap{ margin-top:10px; font-size:.85rem; color:var(--ink-soft); }
+  .masthead .roadmap b{ color:var(--ink); font-weight:600; }
+
+  /* ---------- layout: sidenav + content ---------- */
+  .layout{ display:grid; grid-template-columns:180px 1fr; gap:56px; align-items:start; }
+  @media (max-width:820px){ .layout{ grid-template-columns:1fr; } }
+
+  .sidenav{ position:sticky; top:28px; }
+  @media (max-width:820px){
+    .sidenav{ position:static; display:flex; gap:4px; overflow-x:auto; padding-bottom:14px; margin-bottom:8px; border-bottom:1px solid var(--rule); }
+  }
+  .sidenav-list{ display:flex; flex-direction:column; gap:2px; border-left:1px solid var(--rule); }
+  @media (max-width:820px){ .sidenav-list{ flex-direction:row; border-left:none; gap:8px; } }
+  .sidenav a{
+    display:block; text-decoration:none; color:var(--ink-soft); font-size:.82rem;
+    padding:9px 0 9px 16px; border-left:2px solid transparent; margin-left:-1px; white-space:nowrap;
+  }
+  .sidenav a .num{ color:var(--ink-soft); margin-right:8px; }
+  .sidenav a.active{ color:var(--ink); border-left-color:var(--mark); font-weight:600; }
+  .sidenav a.active .num{ color:var(--mark); }
+  .sidenav a:hover{ color:var(--ink); }
+  .sidenav-note{ margin-top:22px; padding-left:17px; font-size:.78rem; color:var(--ink-soft); border-left:1px solid transparent; max-width:150px; }
+  @media (max-width:820px){ .sidenav-note{ display:none; } }
+
+  main{ min-width:0; }
+
+  /* ---------- chapters ---------- */
+  section.chapter{ padding-top:18px; margin-bottom:88px; scroll-margin-top:24px; }
+  .chapter-head{ display:flex; align-items:baseline; gap:12px; margin-bottom:16px; }
+  .chapter-num{ font-size:.85rem; color:var(--mark); font-weight:600; }
+  h2{ font-size:1.5rem; font-weight:700; }
+  .chapter-intro{ color:var(--ink-soft); max-width:64ch; font-size:1rem; margin:0 0 30px; }
+  .chapter-intro strong{ color:var(--ink); }
+  .subhead{ font-size:1rem; font-weight:700; margin:0 0 12px; }
+  .formula-line{ font-size:1rem; background:var(--surface); border:1px solid var(--rule); padding:14px 20px; margin:4px 0 22px; display:inline-block; }
+
+  /* ---------- McCulloch-Pitts chapter ---------- */
+  .mp-layout{ display:flex; align-items:center; gap:26px; flex-wrap:wrap; }
+  .mp-inputs{ display:flex; flex-direction:column; gap:10px; }
+  .mp-input-btn{ font-size:.92rem; border:1px solid var(--rule); background:var(--surface); color:var(--ink-soft); padding:9px 18px; cursor:pointer; text-align:left; }
+  .mp-input-btn:hover{ border-color:var(--ink-soft); }
+  .mp-input-btn.on{ border-color:var(--mark); color:var(--mark); font-weight:700; }
+  .mp-neuron-wrap{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .mp-hidden-col{ display:flex; flex-direction:column; gap:20px; }
+  .mp-arrow{ font-size:1.5rem; color:var(--ink-soft); }
+
+  /* ---------- Embeddings chapter ---------- */
+  .embed-map-wrap{ display:flex; justify-content:center; }
+  .embed-map{ width:100%; max-width:380px; height:auto; }
+  .embed-map text{ font-family:'JetBrains Mono',monospace; -webkit-user-select:none; user-select:none; }
+  .mp-neuron{ width:52px; height:52px; border-radius:50%; border:2.4px solid var(--rule); background:var(--surface); transition:background .15s, border-color .15s, box-shadow .15s; }
+  .mp-neuron.firing{ background:var(--mark); border-color:var(--mark); box-shadow:0 0 0 6px var(--mark-soft); }
+  .mp-output{ font-size:.8rem; font-weight:600; color:var(--ink-soft); }
+  .mp-output.firing{ color:var(--mark); }
+  .align-grid tbody tr.current td{ background:var(--mark-soft); font-weight:600; }
+
+  /* ---------- RNN chapter (also reused by MLP window slider) ---------- */
+  .rnn-token-strip{ line-height:2.4; }
+  .rnn-token{ display:inline-block; font-size:.95rem; padding:2px 2px; margin-right:12px; color:var(--ink-soft); opacity:.32; }
+  .rnn-token.read{ opacity:.75; }
+  .rnn-token.current{ opacity:1; color:var(--mark); font-weight:700; box-shadow:inset 0 -2px 0 var(--mark); }
+  .rnn-token.outside{ opacity:.2; text-decoration:line-through; }
+  .rnn-token.inwindow{ opacity:1; color:var(--mark); font-weight:700; box-shadow:inset 0 -2px 0 var(--mark); }
+  .rnn-token.target{ opacity:1; color:var(--ink); font-weight:700; box-shadow:inset 0 -2px 0 var(--ink-soft); }
+
+  /* ---------- history chapter: diagrams + comparison ---------- */
+  .diagram-card{ border:1px solid var(--rule); background:var(--surface); padding:20px 22px 22px; margin:0 0 30px; min-width:0; }
+  .diagram-card .pipeline{ overflow-x:auto; padding:2px 0 6px; }
+  .diagram-caption{ font-size:.83rem; color:var(--ink-soft); max-width:66ch; margin:14px 0 0; }
+  .diagram-caption b{ color:var(--ink); }
+
+  .align-wrap{ overflow-x:auto; }
+  .align-grid{ border-collapse:collapse; font-size:.82rem; }
+  .align-grid th, .align-grid td{ padding:9px 14px; text-align:center; border:1px solid var(--rule); }
+  .align-grid thead th{ color:var(--ink-soft); font-weight:500; font-size:.76rem; background:none; border-top:none; }
+  .align-grid tbody th{ color:var(--ink); font-weight:600; text-align:left; white-space:nowrap; }
+  .align-grid td{ min-width:64px; }
+
+  .compare-row{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-bottom:30px; }
+  @media (max-width:640px){ .compare-row{ grid-template-columns:1fr; } }
+  .compare-card{ border:1px solid var(--rule); background:var(--surface); padding:18px 20px 20px; }
+  .compare-card h3{ font-size:.86rem; font-weight:700; margin-bottom:12px; display:flex; align-items:baseline; gap:8px; }
+  .compare-year{ font-size:.72rem; color:var(--ink-soft); font-weight:500; }
+  .compare-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px; }
+  .compare-list li{ font-size:.85rem; color:var(--ink-soft); padding-left:16px; position:relative; line-height:1.5; }
+  .compare-list li:before{ content:'\2013'; position:absolute; left:0; color:var(--mark); font-weight:700; }
+  .compare-list em{ color:var(--ink); font-style:normal; font-weight:600; }
+
+  /* ---------- QKV cards ---------- */
+  .qkv-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:34px; }
+  @media (max-width:640px){ .qkv-row{ grid-template-columns:1fr; } }
+  .qkv-card{ border:1px solid var(--rule); background:var(--surface); padding:18px 18px 20px; }
+  .qkv-card svg{ color:var(--mark); margin-bottom:12px; }
+  .qkv-card h3{ font-size:.82rem; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+  .qkv-card p{ font-size:.87rem; color:var(--ink-soft); margin:0; line-height:1.55; }
+
+  /* ---------- tabstrip (shared control style) ---------- */
+  .controls{ display:flex; flex-wrap:wrap; gap:26px 34px; margin-bottom:22px; }
+  .control{ display:flex; flex-direction:column; gap:8px; }
+  .control-label{ font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); font-weight:600; }
+  .tabstrip{ display:flex; gap:20px; border-bottom:1px solid var(--rule); }
+  .tabstrip button{
+    background:none; border:none; font-size:.76rem; letter-spacing:.03em; color:var(--ink-soft);
+    padding:2px 0 9px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; font-weight:500;
+  }
+  .tabstrip button.active{ color:var(--ink); border-bottom-color:var(--mark); font-weight:600; }
+  .tabstrip button:hover{ color:var(--ink); }
+  .tabstrip button:disabled{ opacity:.35; cursor:not-allowed; }
+
+  input[type=text], textarea{
+    font-size:.86rem; background:var(--surface); border:1px solid var(--rule); color:var(--ink);
+    padding:9px 11px; width:100%;
+  }
+  textarea{ resize:vertical; min-height:60px; }
+
+  .btn{
+    font-size:.78rem; font-weight:600; cursor:pointer; letter-spacing:.02em;
+    padding:9px 15px; border:1px solid var(--ink); background:none; color:var(--ink);
+  }
+  .btn:hover{ background:var(--ink); color:var(--paper); }
+  .btn--solid{ background:var(--ink); color:var(--paper); }
+  .btn--solid:hover{ opacity:.85; background:var(--ink); color:var(--paper); }
+  .btn:disabled{ opacity:.35; cursor:not-allowed; background:none; color:var(--ink); }
+
+  .note{ font-size:.82rem; color:var(--ink-soft); border-left:2px solid var(--rule); padding:2px 0 2px 13px; margin:4px 0 22px; max-width:66ch; }
+  .note strong{ color:var(--ink); }
+
+  /* ---------- §7 sentence + weights ---------- */
+  .token-strip{ margin:2px 0 20px; line-height:2.3; }
+  .token{
+    background:none; border:none; font-size:.92rem; color:var(--ink-soft); cursor:pointer; padding:2px 1px;
+    border-bottom:1.5px dotted var(--ink-soft); margin-right:2px;
+  }
+  .token:hover{ color:var(--ink); border-bottom-color:var(--ink); }
+  .token.active{ color:var(--mark); border-bottom:1.5px solid var(--mark); font-weight:600; }
+
+  .sentence-render{
+    font-size:1.05rem; line-height:2.3; padding:20px 22px;
+    background:var(--surface); border:1px solid var(--rule); margin-bottom:26px;
+  }
+  .sentence-render span{ padding:2px 3px; }
+  .sentence-render span.query{ box-shadow:inset 0 -2px 0 var(--mark); font-weight:700; }
+
+  .rank-list{ display:flex; flex-direction:column; margin-bottom:8px; }
+  .rank-row{ display:grid; grid-template-columns:1.6em 6.5em 1fr 3.6em; align-items:center; gap:12px; padding:6px 0; border-bottom:1px solid var(--rule); font-size:.86rem; }
+  .rank-row:first-child{ border-top:1px solid var(--rule); }
+  .rank-i{ color:var(--ink-soft); font-size:.78rem; }
+  .rank-tok{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rank-tok .self-tag{ color:var(--ink-soft); font-size:.75rem; }
+  .rank-bar-track{ height:16px; background:var(--grid-line); position:relative; }
+  .rank-bar-fill{ position:absolute; inset:0 auto 0 0; background:var(--mark); opacity:.75; }
+  .rank-num{ text-align:right; font-variant-numeric:tabular-nums; color:var(--ink-soft); }
+
+  details.mathbox{ border:1px solid var(--rule); background:var(--surface); margin:8px 0 30px; }
+  details.mathbox > summary{
+    cursor:pointer; padding:13px 18px; font-size:.82rem; font-weight:600; list-style:none;
+    display:flex; align-items:center; gap:8px; user-select:none;
+  }
+  details.mathbox > summary::-webkit-details-marker{ display:none; }
+  details.mathbox > summary:before{ content:'+'; color:var(--mark); font-weight:700; width:1em; }
+  details.mathbox[open] > summary:before{ content:'\2212'; }
+  .mathbox-body{ padding:6px 22px 24px; }
+  .mathbox-body p{ font-size:.85rem; color:var(--ink-soft); max-width:62ch; }
+  .pipeline{ overflow-x:auto; padding:12px 0 6px; }
+  .pipeline svg text{ font-family:'JetBrains Mono',monospace; }
+
+  .worked{ border:1px solid var(--rule); padding:18px 20px 20px; margin:22px 0; }
+  .worked h4, .live-vectors h4{ font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); font-weight:600; margin:0 0 12px; }
+  .worked-grid-wrap{ display:flex; gap:30px; flex-wrap:wrap; align-items:flex-start; margin:14px 0 16px; }
+  .matrix-label{ font-size:.76rem; color:var(--ink-soft); margin-bottom:6px; }
+  .matrix{ display:inline-grid; grid-template-columns:repeat(3, 2.7em); gap:1px; background:var(--rule); border:1px solid var(--rule); font-size:.78rem; }
+  .matrix div{ text-align:center; padding:5px 0; background:var(--surface); }
+  .calc-lines{ font-size:.82rem; line-height:2; color:var(--ink-soft); }
+  .calc-lines b{ color:var(--ink); }
+  .calc-lines .result{ color:var(--mark); font-weight:600; }
+  .calc-lines .qsum{ color:var(--ink); font-weight:600; margin-top:4px; display:inline-block; }
+
+  .live-vectors{ margin-top:26px; }
+  .vecblock{ margin-bottom:14px; }
+  .vecblock-label{ font-size:.78rem; color:var(--ink-soft); margin-bottom:6px; }
+  .vecblock-label b{ color:var(--ink); font-weight:600; }
+  .vec-row{ display:flex; gap:3px; flex-wrap:wrap; }
+  .vec-cell{ border:1px solid var(--rule); background:var(--surface); font-size:.72rem; padding:5px 4px; min-width:2.7em; text-align:center; font-variant-numeric:tabular-nums; }
+  .vec-row.row-x .vec-cell{ opacity:.75; }
+  .vec-row.row-q .vec-cell{ border-color:var(--mark); }
+
+  /* ---------- multi-head ---------- */
+  .heads-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:4px; }
+  @media (max-width:640px){ .heads-grid{ grid-template-columns:1fr; } }
+  .head-card{ border:1px solid var(--rule); background:var(--surface); padding:14px; }
+  .head-card h3{ font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+  .head-card .head-caption{ font-size:.76rem; color:var(--ink-soft); margin-bottom:10px; min-height:2.4em; }
+  .heat-grid{ display:grid; gap:2px; }
+  .heat-cell{ aspect-ratio:1; }
+
+  /* ---------- §9 generation ---------- */
+  .gen-output{
+    font-size:1rem; line-height:1.9; min-height:5em;
+    background:var(--surface); border:1px solid var(--rule); padding:16px 18px; margin-bottom:18px;
+    white-space:pre-wrap; word-break:break-word;
+  }
+  .gen-output .fresh{ box-shadow:inset 0 -2px 0 var(--mark); }
+  @media (prefers-reduced-motion: no-preference){ .gen-output .fresh{ animation:fadein .6s ease-out; } }
+  @keyframes fadein{ from{ background:var(--mark-soft);} to{ background:transparent;} }
+
+  .slider-row{ display:flex; align-items:center; gap:10px; }
+  input[type=range]{ accent-color:var(--mark); width:150px; }
+  .slider-val{ font-size:.8rem; width:2.6em; color:var(--ink-soft); }
+
+  .prob-bars{ display:flex; flex-direction:column; margin-top:4px; }
+  .prob-row{ display:grid; grid-template-columns:minmax(4em,auto) 1fr 3.4em; align-items:center; gap:12px; font-size:.85rem; padding:5px 0; border-bottom:1px solid var(--rule); }
+  .prob-row:first-child{ border-top:1px solid var(--rule); }
+  .prob-w{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .prob-track{ height:14px; background:var(--grid-line); }
+  .prob-fill{ height:100%; background:var(--mark); opacity:.7; }
+  .prob-row.chosen .prob-w{ color:var(--mark); font-weight:700; }
+  .prob-num{ font-size:.78rem; color:var(--ink-soft); text-align:right; font-variant-numeric:tabular-nums; }
+
+  footer{ color:var(--ink-soft); font-size:.83rem; padding-top:18px; border-top:1px solid var(--rule); }
+</style>
+
+<div class="shell">
+
+  <div class="masthead">
+    <div class="kicker">Companion to the LLM code demo</div>
+    <h1>Language AI Story</h1>
+    <p>One story, told from the ground up: how do you get a machine to reliably predict what comes next in a sequence? Every stop below is a live, hands-on model — computed right here in your browser — building one step closer to that answer, from a single neuron that can barely decide AND vs. OR, up to a foundation model generating real text and getting fine-tuned for a job of its own.</p>
+    <p class="roadmap">This page is a running notebook — stops land here as they're built.</p>
+  </div>
+
+  <div class="layout">
+    <nav class="sidenav" aria-label="Stops">
+      <div class="sidenav-list" id="sidenavList">
+        <a href="#mcculloch"><span class="num">01</span>McCulloch&#8209;Pitts Neuron</a>
+        <a href="#perceptron"><span class="num">02</span>Perceptron</a>
+        <a href="#mlp"><span class="num">03</span>Multi&#8209;Layer Perceptron</a>
+        <a href="#backprop"><span class="num">04</span>Backpropagation</a>
+        <a href="#embeddings"><span class="num">05</span>Embeddings</a>
+        <a href="#rnn"><span class="num">06</span>How RNNs Read</a>
+        <a href="#attention"><span class="num">07</span>Self&#8209;Attention</a>
+        <a href="#history"><span class="num">08</span>Before Transformers</a>
+        <a href="#generation"><span class="num">09</span>Token Generation</a>
+        <a href="#foundation"><span class="num">10</span>Foundation Model</a>
+        <a href="#finetune"><span class="num">11</span>Fine&#8209;tuning</a>
+      </div>
+      <div class="sidenav-note">More chapters land here as the notebook grows.</div>
+    </nav>
+
+    <main>
+
+      <!-- ================= CHAPTER 1 ================= -->
+      <section class="chapter" id="mcculloch">
+        <div class="chapter-head"><span class="chapter-num">01</span><h2>The McCulloch&#8209;Pitts Neuron</h2></div>
+        <p class="chapter-intro">In 1943 — decades before "neural network" was even a phrase — Warren McCulloch and Walter Pitts proposed the simplest possible model of a neuron. No training, no real-valued weights adjusting over time, not even learning: just binary inputs, a weighted sum, and a threshold. If the sum clears the threshold, the neuron <strong>fires</strong> (outputs 1). If it doesn't, the neuron stays silent (outputs 0). That's the whole model.</p>
+
+        <div class="formula-line">output &nbsp;=&nbsp; 1 &nbsp;if&nbsp; (w<sub>1</sub>x<sub>1</sub> + w<sub>2</sub>x<sub>2</sub> + &hellip;) &ge; threshold &nbsp;&nbsp;else&nbsp; 0</div>
+
+        <p class="chapter-intro">McCulloch and Pitts' point wasn't really biology — it was that this one trivial device, wired up with the right fixed weights and threshold, can compute logic. Pick a gate below, flip the inputs, and watch the neuron decide for itself.</p>
+
+        <div class="controls">
+          <div class="control">
+            <span class="control-label">Logic gate</span>
+            <div class="tabstrip" id="mpPresetMode">
+              <button data-v="AND" class="active">AND</button>
+              <button data-v="OR">OR</button>
+              <button data-v="NOT">NOT</button>
+              <button data-v="GREETING">"is this a greeting?"</button>
+            </div>
+          </div>
+        </div>
+        <p class="note" id="mpPresetNote" style="display:block;"></p>
+
+        <div class="diagram-card">
+          <div class="mp-layout">
+            <div class="mp-inputs" id="mpInputs"></div>
+            <div class="mp-neuron-wrap">
+              <div class="mp-neuron" id="mpNeuron"></div>
+              <div class="mp-output" id="mpOutput"></div>
+            </div>
+          </div>
+          <div class="control-label" style="margin:20px 0 8px;">weighted sum</div>
+          <div class="formula-line" id="mpSumLine" style="display:block;"></div>
+          <p class="diagram-caption">Fires whenever the sum is at least <b id="mpThreshold"></b> — the threshold wired into this gate.</p>
+        </div>
+
+        <div class="control-label" style="margin:26px 0 10px;">Truth table for this gate</div>
+        <div class="align-wrap">
+          <table class="align-grid" id="mpTruthTable">
+            <thead><tr id="mpTruthHead"></tr></thead>
+            <tbody id="mpTruthBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= CHAPTER 2 ================= -->
+      <section class="chapter" id="perceptron">
+        <div class="chapter-head"><span class="chapter-num">02</span><h2>Perceptron</h2></div>
+        <p class="chapter-intro">The McCulloch-Pitts neuron could compute AND — but only because we set <code>w<sub>1</sub>=1, w<sub>2</sub>=1</code> by hand. Fixed weights don't scale: someone has to hand-solve every new gate. In 1958, Frank Rosenblatt asked: what if the neuron started knowing nothing, and learned those weights itself, just by seeing examples and getting nudged when it's wrong?</p>
+
+        <div class="formula-line">w<sub>i</sub> &nbsp;&larr;&nbsp; w<sub>i</sub> + (target &minus; prediction) &times; x<sub>i</sub></div>
+
+        <p class="chapter-intro">Same firing rule as the McCulloch-Pitts neuron. The only difference: every time it's wrong, each weight gets nudged toward the answer. Press "Train step" to feed it one example at a time — it's learning AND from scratch.</p>
+
+        <div class="diagram-card">
+          <div class="control-label" style="margin-bottom:10px;">Training examples (AND)</div>
+          <div class="align-wrap">
+            <table class="align-grid" id="ptDataTable">
+              <thead><tr><th>x<sub>1</sub></th><th>x<sub>2</sub></th><th>target</th></tr></thead>
+              <tbody id="ptDataBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="control-label" style="margin-bottom:8px;">This step</div>
+          <div class="calc-lines" id="ptStepLine"></div>
+          <div class="control-label" style="margin:18px 0 8px;">Weights</div>
+          <div class="vec-row" id="ptWeights"></div>
+          <p class="diagram-caption">Correctly classifies <b id="ptAccuracy"></b> of the 4 examples right now.</p>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn--solid" id="ptStepBtn">Train step &rarr;</button>
+          <button class="btn" id="ptPlayBtn">Auto-train</button>
+          <button class="btn" id="ptResetBtn">Reset</button>
+        </div>
+        <p class="diagram-caption" id="ptDoneNote" style="display:none;"><strong>Learned it.</strong> Nobody told this perceptron w<sub>1</sub>=1, w<sub>2</sub>=1 &mdash; it found AND on its own, a few wrong guesses at a time. The catch: this nudge rule only ever draws a single straight line between right and wrong — stacking neurons into layers fixes that, coming up next.</p>
+      </section>
+
+      <!-- ================= CHAPTER 3 ================= -->
+      <section class="chapter" id="mlp">
+        <div class="chapter-head"><span class="chapter-num">03</span><h2>Multi&#8209;Layer Perceptron</h2></div>
+        <p class="chapter-intro">A single perceptron draws exactly one straight line. Some patterns can't be split by any straight line at all — the classic example is <strong>XOR</strong>. Stack a hidden layer of neurons in between, and the network can bend that line into a shape. (How do you actually find the right weights for a stack like this? That's next.)</p>
+
+        <div class="diagram-card">
+          <div class="mp-layout">
+            <div class="mp-inputs" id="xorInputs"></div>
+            <div class="mp-arrow">&rarr;</div>
+            <div class="mp-hidden-col">
+              <div class="mp-neuron-wrap"><div class="mp-neuron" id="xorH1"></div><div class="mp-output">h<sub>1</sub> = OR</div></div>
+              <div class="mp-neuron-wrap"><div class="mp-neuron" id="xorH2"></div><div class="mp-output">h<sub>2</sub> = NAND</div></div>
+            </div>
+            <div class="mp-arrow">&rarr;</div>
+            <div class="mp-neuron-wrap">
+              <div class="mp-neuron" id="xorOut"></div>
+              <div class="mp-output" id="xorOutLabel"></div>
+            </div>
+          </div>
+          <p class="diagram-caption">Output = h<sub>1</sub> AND h<sub>2</sub>. Neither hidden neuron alone computes XOR — but the two together do. That's a shape no single straight line can draw.</p>
+        </div>
+
+        <div class="control-label" style="margin:24px 0 10px;">Truth table</div>
+        <div class="align-wrap">
+          <table class="align-grid" id="xorTruthTable">
+            <thead><tr><th>x<sub>1</sub></th><th>x<sub>2</sub></th><th>h<sub>1</sub></th><th>h<sub>2</sub></th><th>output</th></tr></thead>
+            <tbody id="xorTruthBody"></tbody>
+          </table>
+        </div>
+
+        <h3 class="subhead" style="margin-top:36px;">Now point it at language: predict the next word</h3>
+        <p class="chapter-intro">The obvious way to use a network like this for text: feed it a <strong>fixed window</strong> of the last few words, and have it guess the next one. Step through the sentence and watch the window slide.</p>
+
+        <div class="controls">
+          <div class="control">
+            <span class="control-label">Window size</span>
+            <div class="tabstrip" id="mlpWindowMode">
+              <button data-v="1">1 word</button>
+              <button data-v="2" class="active">2 words</button>
+              <button data-v="3">3 words</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="rnn-token-strip" id="mlpTokenStrip"></div>
+          <p class="diagram-caption" id="mlpWindowCaption" style="margin-top:16px;"></p>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn--solid" id="mlpNextBtn">Next word &rarr;</button>
+          <button class="btn" id="mlpResetBtn">Reset</button>
+        </div>
+
+        <p class="diagram-caption" style="margin-top:20px;">Whatever's outside the window is invisible &mdash; permanently. A bigger window just means more fixed-position weights, not real flexibility: a sentence one word longer than your widest window still breaks it. An RNN fixes this with one set of weights, reused at every step, carrying a memory instead of a window.</p>
+      </section>
+
+      <!-- ================= CHAPTER 4 ================= -->
+      <section class="chapter" id="backprop">
+        <div class="chapter-head"><span class="chapter-num">04</span><h2>Backpropagation</h2></div>
+        <p class="chapter-intro">A perceptron can only learn things a straight line can separate. Stacking neurons into layers, as we just saw, breaks past that — but the perceptron's simple nudge rule has no idea how to update weights buried inside a hidden layer. Backpropagation solves that: the same learn-from-mistakes idea, generalized with calculus so the correction reaches every layer, not just the last one.</p>
+
+        <p class="chapter-intro">The idea has three parts. <strong>Forward pass:</strong> run the input through the network to get a prediction. <strong>Loss:</strong> measure how wrong that prediction is. <strong>Backward pass:</strong> use calculus — the chain rule — to work out exactly how much each weight contributed to that error, then nudge every weight a little in the direction that reduces it. Do this enough times and the weights converge on values that actually work.</p>
+
+        <p class="chapter-intro">Here's the smallest network that actually needs the chain rule: two weights, chained one after another, learning to turn <code>x = 2</code> into <code>y = 12</code>.</p>
+
+        <div class="diagram-card">
+          <div class="pipeline" id="bpDiagram"></div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="control-label" style="margin-bottom:8px;">Forward pass</div>
+          <div class="calc-lines" id="bpForward"></div>
+          <div class="control-label" style="margin:20px 0 8px;">Backward pass — the chain rule</div>
+          <div class="calc-lines" id="bpBackward"></div>
+          <div class="control-label" style="margin:20px 0 8px;">Weight update</div>
+          <div class="calc-lines" id="bpUpdate"></div>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn--solid" id="bpStepBtn">Train step &rarr;</button>
+          <button class="btn" id="bpPlayBtn">Auto-train</button>
+          <button class="btn" id="bpResetBtn">Reset</button>
+        </div>
+
+        <div class="control-label" style="margin:26px 0 10px;">Loss, step by step</div>
+        <div class="prob-bars" id="bpLossHistory"></div>
+        <p class="diagram-caption" id="bpDoneNote" style="display:none; margin-top:14px;"><strong>Converged.</strong> Nobody told this network that w&#8321;&times;w&#8322; should end up around 2.449&times;2.449 &asymp; 6 — it found that itself, purely by following the gradient downhill, one small step at a time. Scale this up to millions of weights and you have how every model on this page actually learned anything.</p>
+      </section>
+
+      <!-- ================= CHAPTER 5 ================= -->
+      <section class="chapter" id="embeddings">
+        <div class="chapter-head"><span class="chapter-num">05</span><h2>Embeddings</h2></div>
+        <p class="chapter-intro">Every network so far has computed on numbers. But words aren't numbers — feed a network the word "cat" directly and it has nothing to multiply. Hence: an <strong>embedding</strong>, a lookup table that turns each word into a fixed list of numbers, placed so that words used in similar ways end up near each other.</p>
+
+        <p class="chapter-intro">Click a word below. Its embedding here is just two numbers — a point on a map — small enough to actually see. Every other word-to-number step on this page works exactly the same way, just with hundreds of numbers instead of two.</p>
+
+        <div class="diagram-card">
+          <div class="embed-map-wrap">
+            <svg id="embedMap" viewBox="0 0 320 320" class="embed-map"></svg>
+          </div>
+          <div class="control-label" style="margin:18px 0 8px;">Selected word</div>
+          <div class="calc-lines" id="embedInfo"></div>
+        </div>
+        <p class="diagram-caption">These ten points were placed by hand to make the clustering obvious. Nobody placed them in a real model — a network learns positions like these automatically, just by reading enough text.</p>
+      </section>
+
+      <!-- ================= CHAPTER 6 ================= -->
+      <section class="chapter" id="rnn">
+        <div class="chapter-head"><span class="chapter-num">06</span><h2>How RNNs Read a Sequence</h2></div>
+        <p class="chapter-intro">Multi-layer networks can only ever see a fixed window of words — make the window bigger and you just get more fixed-position weights, not real flexibility. The <strong>recurrent neural network</strong> (RNN) fixes that: one set of weights, reused at every step, carrying a running memory forward instead of a window. Let's watch one actually do that, one step at a time.</p>
+
+        <p class="chapter-intro">At every step, an RNN combines two things: the current word (as a vector) and whatever it remembers so far — its <strong>hidden state</strong> — into a brand new hidden state. That new state becomes both this step's output and next step's memory:</p>
+
+        <div class="formula-line">h<sub>t</sub> &nbsp;=&nbsp; tanh( x<sub>t</sub> &middot; W<sub>x</sub> &nbsp;+&nbsp; h<sub>t&minus;1</sub> &middot; W<sub>h</sub> )</div>
+
+        <p class="chapter-intro">There's no shortcut: computing step 4 requires step 3's result first. Nothing here is trained (same honesty as the rest of this page — the weights are fixed and random), but the mechanism is exactly right. Press "Next word" and watch the hidden state actually change, number by number.</p>
+
+        <div class="diagram-card">
+          <div class="rnn-token-strip" id="rnnTokenStrip"></div>
+          <div class="control-label" id="rnnStepCaption" style="margin:18px 0 10px;"></div>
+          <div class="vec-row" id="rnnHiddenState"></div>
+          <p class="diagram-caption" id="rnnFinalNote" style="display:none; margin-top:16px;"><strong>This is it</strong> — everything about the sentence you just read has to live inside these 8 numbers now. Nothing else survives to the next step. That squeeze is exactly the problem attention was invented to solve.</p>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn--solid" id="rnnNextBtn">Next word &rarr;</button>
+          <button class="btn" id="rnnPlayBtn">Auto-play</button>
+          <button class="btn" id="rnnResetBtn">Reset</button>
+        </div>
+      </section>
+
+      <!-- ================= CHAPTER 7 ================= -->
+      <section class="chapter" id="attention">
+        <div class="chapter-head"><span class="chapter-num">07</span><h2>Self-Attention</h2></div>
+        <p class="chapter-intro">Before a model can understand a sentence, every word needs to figure out <strong>which other words to pay attention to.</strong> Self-attention is the mechanism that computes this, for every word, all at once.</p>
+
+        <div class="qkv-row">
+          <div class="qkv-card">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.3" y1="15.3" x2="21" y2="21"/></svg>
+            <h3>Query</h3>
+            <p>What this word is looking for. Every word asks a question.</p>
+          </div>
+          <div class="qkv-card">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7.5" cy="16.5" r="4"/><line x1="10.5" y1="13.5" x2="21" y2="3"/><line x1="16" y1="8" x2="19" y2="11"/><line x1="19.5" y1="4.5" x2="22" y2="7"/></svg>
+            <h3>Key</h3>
+            <p>What this word has to offer. Every word advertises an answer.</p>
+          </div>
+          <div class="qkv-card">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6a2 2 0 0 1 2-2h9l7 7-7 7-9-9V6Z"/><circle cx="8" cy="8" r="1.3" fill="currentColor" stroke="none"/></svg>
+            <h3>Value</h3>
+            <p>What this word actually hands over, if another word decides to attend to it.</p>
+          </div>
+        </div>
+
+        <p class="chapter-intro" style="margin-bottom:22px;">A word's Query is compared against every word's Key. A strong match means a high score — after softmax, that becomes an <strong>attention weight</strong>: how much this word borrows from that word's Value. Click a word below and watch its weights.</p>
+
+        <div class="controls">
+          <div class="control">
+            <span class="control-label">Sentence</span>
+            <div class="tabstrip" id="sentMode">
+              <button data-v="example" class="active">Example</button>
+              <button data-v="custom">Your own</button>
+            </div>
+          </div>
+          <div class="control">
+            <span class="control-label">Weights</span>
+            <div class="tabstrip" id="trainedMode">
+              <button data-v="random">Random</button>
+              <button data-v="trained" class="active">Trained</button>
+            </div>
+          </div>
+          <div class="control">
+            <span class="control-label">Heads</span>
+            <div class="tabstrip" id="headMode">
+              <button data-v="1" class="active">1 head</button>
+              <button data-v="4">4 heads</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="customRow" style="display:none; margin-bottom:20px;">
+          <input type="text" id="customSentence" value="The trophy didn't fit in the suitcase because it was too big" spellcheck="false">
+        </div>
+        <p class="note" id="trainedNote" style="display:none;"><strong>Random weights only</strong> — the "trained" pattern is hand-illustrated for the two example sentences, standing in for what gradient descent would learn from real data. Type your own sentence to see raw, untrained attention: close to uniform, no linguistic sense yet.</p>
+
+        <div id="singleHeadView">
+          <div class="token-strip" id="tokenStrip"></div>
+          <div class="sentence-render" id="sentenceRender"></div>
+          <div class="rank-list" id="rankList"></div>
+
+          <details class="mathbox">
+            <summary>Show the math behind these weights</summary>
+            <div class="mathbox-body">
+              <p>Every word's embedding vector runs through this pipeline. The numbers in the list above are exactly what falls out the far end for the word you clicked.</p>
+              <div class="pipeline" id="pipeline"></div>
+
+              <p style="margin-top:22px;"><strong style="color:var(--ink);">Where does the embedding come from?</strong> Every word is looked up in a table and comes back as a fixed list of numbers — its embedding. In a real model this table is learned during training, so words used in similar ways end up with similar-looking lists of numbers; this demo just uses fixed, reproducible numbers per word instead, since nothing here is actually trained.</p>
+
+              <p><strong style="color:var(--ink);">Where do Query, Key and Value come from?</strong> Each is that <em>same</em> embedding, multiplied by its own matrix of learned weights (<code>Wq</code>, <code>Wk</code>, <code>Wv</code>). "Multiplied by a matrix" just means: every output number is a weighted sum of every input number. Same input, three different matrices, three different vectors out. Here's the arithmetic for a toy 3-number embedding, worked by hand:</p>
+
+              <div class="worked">
+                <h4>Toy example — computing Q from x = [0.9, &minus;0.2, 0.4]</h4>
+                <div class="worked-grid-wrap">
+                  <div>
+                    <div class="matrix-label">Wq (one column per output number)</div>
+                    <div class="matrix">
+                      <div>0.5</div><div>0.2</div><div>&minus;0.1</div>
+                      <div>0.1</div><div>&minus;0.4</div><div>0.3</div>
+                      <div>&minus;0.3</div><div>0.6</div><div>0.2</div>
+                    </div>
+                  </div>
+                  <div class="calc-lines">
+                    Q<sub>0</sub> = 0.9(0.5) + &minus;0.2(0.1) + 0.4(&minus;0.3) = <span class="result">0.31</span><br>
+                    Q<sub>1</sub> = 0.9(0.2) + &minus;0.2(&minus;0.4) + 0.4(0.6) = <span class="result">0.50</span><br>
+                    Q<sub>2</sub> = 0.9(&minus;0.1) + &minus;0.2(0.3) + 0.4(0.2) = <span class="result">&minus;0.07</span>
+                    <span class="qsum">Q = [0.31, 0.50, &minus;0.07]</span>
+                  </div>
+                </div>
+                <p style="margin:0;">K and V are computed exactly the same way — same x, but each run through its <em>own</em> matrix (<code>Wk</code>, <code>Wv</code>). Three learned lenses on the same word.</p>
+              </div>
+
+              <div class="live-vectors">
+                <h4>Live, for the word you clicked: "<span id="liveWordLabel"></span>"</h4>
+                <div id="liveVectors"></div>
+                <p style="margin-top:2px;">Real vectors, computed just now, in your browser — 8 numbers each here (real models use hundreds to thousands). Click a different word above and watch all four rows change.</p>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div id="headsView" style="display:none;">
+          <p class="note" style="display:block; margin-bottom:20px;">Same sentence, four independent heads running in parallel. With <strong>Trained</strong> selected, head 0 is nudged to resolve pronouns ("it" &rarr; "animal") and head 1 to bind verbs to objects ("cross" &rarr; "street") — standing in for the specialisation real training produces. Heads 2&ndash;3 are left random: a stand-in for the many other patterns a trained model's extra heads pick up.</p>
+          <div class="heads-grid" id="headsGrid"></div>
+        </div>
+      </section>
+
+      <!-- ================= CHAPTER 8 ================= -->
+      <section class="chapter" id="history">
+        <div class="chapter-head"><span class="chapter-num">08</span><h2>Before Transformers</h2></div>
+        <p class="chapter-intro">Attention didn't start with Transformers. It was invented in 2014&ndash;15, bolted onto the RNN, to fix a specific problem: the one hidden state that RNN ends on has to represent the <em>entire</em> sentence, and every step has to wait for the one before it &mdash; no shortcuts, no jumping ahead. Transformers (2017) then asked a bolder question: what if we kept the attention and threw the RNN away entirely?</p>
+
+        <h3 class="subhead">The 2014&ndash;15 fix: don't throw the earlier states away</h3>
+        <p class="chapter-intro">Bahdanau's and Luong's insight: keep <em>every</em> hidden state, not just the last one. While producing each output word, compute a score between what you're generating now and <em>every</em> input hidden state, softmax those into weights, and blend accordingly. That's the same score &rarr; softmax &rarr; weighted-blend recipe from self-attention — just comparing a decoder step against another sequence's hidden states, instead of a word against words in its own sentence. That distinction has a name: this is <strong>cross-attention</strong> (one sequence attending to a different one), not self-attention (a sequence attending to itself). Transformers use both.</p>
+
+        <div class="diagram-card">
+          <p class="diagram-caption" style="margin-top:0; margin-bottom:14px;">A classic example of why this mattered: word order isn't the same across languages. Translating "the black cat" into Italian gives "il gatto nero" — the adjective jumps from before the noun to after it. A model that could only align word 1&harr;1, 2&harr;2, 3&harr;3 has no chance. Attention just learns wherever the alignment actually is:</p>
+          <div class="align-wrap">
+            <table class="align-grid" id="alignGrid" aria-label="Translation attention alignment"></table>
+          </div>
+          <p class="diagram-caption">Row = Italian output word, column = English source word. "nero" lights up "black" — two positions away, out of order — because attention doesn't care about position, only relevance.</p>
+        </div>
+
+        <h3 class="subhead">2017: what if attention is <em>all</em> you need?</h3>
+        <p class="chapter-intro">The Transformer paper kept the score &rarr; softmax &rarr; blend idea, then made two changes that mattered more than anything since: it dropped the RNN completely, and it used attention <em>within</em> a sequence too (self-attention, covered earlier) alongside the cross-attention link between encoder and decoder. The payoff is best seen as a question: <strong>how many steps does information need to travel from word 1 to word 6?</strong></p>
+
+        <div class="compare-row">
+          <div class="diagram-card">
+            <div class="pipeline" id="pathRnn"></div>
+            <p class="diagram-caption"><b>RNN:</b> word 1's information has to pass through every hidden state in between. Five hops, computed strictly in order — and the more words in between, the more chances for it to fade.</p>
+          </div>
+          <div class="diagram-card">
+            <div class="pipeline" id="pathTransformer"></div>
+            <p class="diagram-caption"><b>Transformer:</b> word 1 attends to word 6 directly. One hop, regardless of distance — and every word's attention is computed at the same time, not one after another.</p>
+          </div>
+        </div>
+
+        <p class="chapter-intro" style="margin-top:2px;">That parallelism is also why Transformers train so much faster on GPUs: an RNN's word-by-word dependency can't be parallelised across a sequence, but a Transformer's attention can.</p>
+
+        <h3 class="subhead">The price of dropping the RNN: order has to be added back in</h3>
+        <p class="chapter-intro">An RNN never had to be told what order words came in — it read them in order, one at a time, so order was baked into the process itself. A Transformer looks at every word at once, and attention on its own can't tell "the cat sat" from "sat the cat": it only compares what each word <em>is</em>, never where it sits. So before attention runs, every word's embedding gets a second vector added on top of it &mdash; a <strong>positional encoding</strong>: a fixed pattern of numbers that depends only on the word's position (1st, 2nd, 3rd&hellip;), never on what the word actually is. Position 2 gets the exact same pattern whether the second word is "cat" or "jumped".</p>
+        <p class="chapter-intro">The original Transformer paper builds that pattern from sine and cosine waves at different frequencies per position &mdash; not because the wave shape is special, but because it gives every position its own distinct, structured fingerprint. Here's that exact formula, computed live for two different positions:</p>
+
+        <div class="diagram-card">
+          <div class="control-label" style="margin-bottom:10px;">Positional encoding vectors (8 numbers each)</div>
+          <div class="vecblock"><div class="vecblock-label"><b>position 1</b></div><div class="vec-row" id="peRow1"></div></div>
+          <div class="vecblock" style="margin-bottom:0;"><div class="vecblock-label"><b>position 5</b></div><div class="vec-row" id="peRow5"></div></div>
+          <p class="diagram-caption">Same formula, different position in &rarr; different pattern out. Every position gets its own fixed fingerprint, completely unrelated to which word ends up standing there.</p>
+        </div>
+
+        <div class="diagram-card">
+          <div class="control-label" style="margin-bottom:10px;">What attention actually sees for "cat" sitting at position 2</div>
+          <div class="vecblock"><div class="vecblock-label"><b>embedding</b> of "cat" (what the word is)</div><div class="vec-row row-x" id="peWordVec"></div></div>
+          <div class="vecblock"><div class="vecblock-label">+ <b>positional encoding</b> (where it sits: position 2)</div><div class="vec-row" id="peVec2"></div></div>
+          <div class="vecblock" style="margin-bottom:0;"><div class="vecblock-label">= <b>combined vector</b> attention compares against every other word</div><div class="vec-row row-q" id="peCombined"></div></div>
+          <p class="diagram-caption">Swap "cat" for a different word at position 2, and only the first row changes — the position row stays identical. Move "cat" to a different position, and it's the reverse. That single addition is the whole trick: order becomes part of the vector itself, not a separate step.</p>
+        </div>
+
+        <div class="compare-row">
+          <div class="compare-card">
+            <h3>RNN + Attention <span class="compare-year">2014&ndash;15</span></h3>
+            <ul class="compare-list">
+              <li>Reads one word at a time, strictly in order</li>
+              <li>Attention bolted on top, to peek back at encoder states</li>
+              <li>Path length between distant words grows with distance</li>
+              <li>Can't be parallelised across a sequence</li>
+            </ul>
+          </div>
+          <div class="compare-card">
+            <h3>Transformer <span class="compare-year">2017</span></h3>
+            <ul class="compare-list">
+              <li>Reads the whole sequence at once</li>
+              <li>Attention <em>is</em> the architecture, not an add-on</li>
+              <li>Any two words connect in a single step</li>
+              <li>Runs in parallel — built for GPUs</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= CHAPTER 9 ================= -->
+      <section class="chapter" id="generation">
+        <div class="chapter-head"><span class="chapter-num">09</span><h2>Token Generation</h2></div>
+        <p class="chapter-intro">This model reads <strong>whole words</strong>, not letters. At every step it looks at the last few words and produces a probability for every word it might say next — built instantly from the text below. Press <strong>Next word</strong> to run the loop a real LLM runs: predict &rarr; choose &rarr; append &rarr; repeat.</p>
+
+        <div class="controls">
+          <div class="control">
+            <span class="control-label">Training text</span>
+            <div class="tabstrip" id="corpusMode">
+              <button data-v="catdog" class="active">Cat &amp; Dog</button>
+              <button data-v="twinkle">Twinkle Twinkle</button>
+              <button data-v="custom">Your own</button>
+            </div>
+          </div>
+          <div class="control">
+            <span class="control-label">Looks back</span>
+            <div class="tabstrip" id="contextMode">
+              <button data-v="1">1 word</button>
+              <button data-v="2">2 words</button>
+              <button data-v="3" class="active">3 words</button>
+            </div>
+          </div>
+          <div class="control">
+            <span class="control-label">Decoding</span>
+            <div class="tabstrip" id="decodeMode">
+              <button data-v="greedy" class="active">Greedy</button>
+              <button data-v="sample">Sample</button>
+            </div>
+          </div>
+          <div class="control">
+            <span class="control-label">Temperature</span>
+            <div class="slider-row">
+              <input type="range" id="tempSlider" min="0.15" max="0.9" step="0.05" value="0.4">
+              <span class="slider-val mono" id="tempVal">0.40</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="corpusCustomRow" style="display:none; margin-bottom:16px;">
+          <textarea id="corpusCustomText" spellcheck="false" placeholder="Paste a paragraph of your own text — the model rebuilds instantly from whatever you type. Longer, less repetitive text samples more smoothly."></textarea>
+        </div>
+
+        <p class="note" id="lookbackNote">This toy model only ever looks at the last <strong id="lookbackCount">3</strong> word(s) — unlike self-attention, which can look at an <strong>entire</strong> sentence at once. Raise or lower "Looks back" to feel the difference.</p>
+
+        <div class="control" style="margin-bottom:20px;">
+          <span class="control-label">Prompt</span>
+          <input type="text" id="promptInput" spellcheck="false">
+        </div>
+
+        <div class="gen-output mono" id="genOutput"></div>
+
+        <div class="controls" style="margin-bottom:26px;">
+          <button class="btn btn--solid" id="nextBtn">Next word &rarr;</button>
+          <button class="btn" id="playBtn">Auto-play</button>
+          <button class="btn" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="control-label" style="margin-bottom:10px;">Next-word probabilities</div>
+        <div class="prob-bars" id="probBars"></div>
+        <p class="note" id="sampleWarnNote" style="display:none; margin-top:16px;">With only a few dozen words of training text, <strong>Sample</strong> mode has very little to draw on and can turn to noise fast — that's a real, honest limitation of small data, not a bug. Real LLMs avoid it by training on billions of words. Try pasting in a longer paragraph of your own, or switch back to Greedy.</p>
+      </section>
+
+      <!-- ================= STOP 10 ================= -->
+      <section class="chapter" id="foundation">
+        <div class="chapter-head"><span class="chapter-num">10</span><h2>Foundation Model</h2></div>
+        <p class="chapter-intro">Predicting the next word, one token at a time on a tiny paragraph — that's the same trick behind real foundation models, just scaled up to trillions of words. At that scale, something new shows up: the same frozen weights can do almost anything, just by changing what you ask.</p>
+
+        <div class="controls">
+          <div class="control">
+            <span class="control-label">Ask it to&hellip;</span>
+            <div class="tabstrip" id="fmTaskMode">
+              <button data-v="translate" class="active">Translate</button>
+              <button data-v="summarize">Summarize</button>
+              <button data-v="qa">Answer a question</button>
+              <button data-v="code">Write code</button>
+            </div>
+          </div>
+        </div>
+        <p class="note">These four completions are fixed examples, not computed live — this page has no real LLM to call. The point is what <em>doesn't</em> change between them: the weights.</p>
+
+        <div class="diagram-card">
+          <div class="control-label" style="margin-bottom:8px;">Prompt</div>
+          <div class="gen-output mono" id="fmPrompt" style="margin-bottom:18px;"></div>
+          <div class="control-label" style="margin-bottom:8px;">Completion</div>
+          <div class="gen-output mono" id="fmCompletion"></div>
+        </div>
+        <p class="diagram-caption">Same weights, four different jobs, nothing retrained in between — that's the "foundation" in foundation model: one general-purpose base, redirected entirely through the prompt.</p>
+      </section>
+
+      <!-- ================= STOP 11 ================= -->
+      <section class="chapter" id="finetune">
+        <div class="chapter-head"><span class="chapter-num">11</span><h2>Fine&#8209;tuning</h2></div>
+        <p class="chapter-intro">Prompting alone has limits. Fine-tuning goes back to real training — backpropagation, exactly the same algorithm — but starting from the foundation model's already-good weights instead of zero, and updating them on a small, focused dataset.</p>
+
+        <div class="controls">
+          <div class="control">
+            <span class="control-label">Start from</span>
+            <div class="tabstrip" id="ftStartMode">
+              <button data-v="scratch" class="active">Scratch (untrained)</button>
+              <button data-v="pretrained">Pretrained</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="control-label" style="margin-bottom:8px;">Forward pass</div>
+          <div class="calc-lines" id="ftForward"></div>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn--solid" id="ftStepBtn">Train step &rarr;</button>
+          <button class="btn" id="ftResetBtn">Reset</button>
+        </div>
+
+        <div class="control-label" style="margin:26px 0 10px;">Loss, step by step</div>
+        <div class="prob-bars" id="ftLossHistory"></div>
+        <p class="diagram-caption">Same gradient descent, same target — starting from pretrained weights instead of zero just needs far fewer steps to get there. That's the entire economic case for fine-tuning instead of training from scratch.</p>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>Built to accompany <code>01</code>&ndash;<code>04</code> in the same folder — those NumPy / PyTorch scripts show this exact math with every intermediate value printed. Everything on this page runs client-side; nothing is sent anywhere.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ============================================================
+  // Shared helpers
+  // ============================================================
+  function hashStr(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h,16777619); } return h>>>0; }
+  function mulberry32(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed>>>15, 1 | seed); t = t + Math.imul(t ^ t>>>7, 61 | t) ^ t; return ((t ^ t>>>14) >>> 0) / 4294967296; }; }
+  function gaussianish(rand){ return (rand()+rand()+rand()-1.5)/1.5; }
+  function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  const CHAIN_WORDS = ['The','cat','sat','on','the','mat'];
+
+  // ============================================================
+  // §1 McCulloch-Pitts engine
+  // ============================================================
+  const MP_PRESETS = {
+    AND: { inputs:2, weights:[1,1],  threshold:2, note:'Fires only when every input is 1.' },
+    OR:  { inputs:2, weights:[1,1],  threshold:1, note:'Fires when at least one input is 1.' },
+    NOT: { inputs:1, weights:[-1],   threshold:0, note:'A single input, flipped: fires exactly when the input is 0.' },
+    GREETING: { inputs:2, weights:[1,1], threshold:1, note:'Same math as OR, wearing a text costume: fires if the message starts with either greeting.',
+      labels:['starts with "hi"', 'starts with "hello"'] },
+  };
+  const mpState = { preset:'AND', inputs:[0,0] };
+
+  function mpCompute(presetKey, inputs){
+    const p = MP_PRESETS[presetKey];
+    const sum = inputs.reduce((s,x,i)=> s + x*p.weights[i], 0);
+    return { sum, fires: sum >= p.threshold ? 1 : 0 };
+  }
+
+  function renderMp(){
+    const p = MP_PRESETS[mpState.preset];
+    if(mpState.inputs.length !== p.inputs) mpState.inputs = new Array(p.inputs).fill(0);
+    document.getElementById('mpPresetNote').textContent = p.note;
+
+    const inputsEl = document.getElementById('mpInputs');
+    inputsEl.innerHTML = '';
+    mpState.inputs.forEach((v,i)=>{
+      const btn = document.createElement('button');
+      btn.className = 'mp-input-btn' + (v===1 ? ' on' : '');
+      const label = p.labels ? p.labels[i] : `x<sub>${i+1}</sub>`;
+      btn.innerHTML = `${label} = <b>${v}</b>`;
+      btn.addEventListener('click', ()=>{ mpState.inputs[i] = mpState.inputs[i]===0 ? 1 : 0; renderMp(); });
+      inputsEl.appendChild(btn);
+    });
+
+    const { sum, fires } = mpCompute(mpState.preset, mpState.inputs);
+    document.getElementById('mpSumLine').innerHTML = p.weights.map((w,i)=> `${w<0?'&minus;':''}${Math.abs(w)}&times;${mpState.inputs[i]}`).join(' + ') + ` &nbsp;=&nbsp; <b>${sum}</b>`;
+    document.getElementById('mpThreshold').textContent = p.threshold;
+    document.getElementById('mpNeuron').classList.toggle('firing', fires===1);
+    const outEl = document.getElementById('mpOutput');
+    outEl.textContent = fires===1 ? 'fires → output 1' : 'silent → output 0';
+    outEl.classList.toggle('firing', fires===1);
+
+    const n = p.inputs;
+    document.getElementById('mpTruthHead').innerHTML = Array.from({length:n},(_,i)=>`<th>x<sub>${i+1}</sub></th>`).join('') + '<th>sum</th><th>output</th>';
+    const tbody = document.getElementById('mpTruthBody');
+    tbody.innerHTML = '';
+    for(let mask=0; mask<(1<<n); mask++){
+      const combo = []; for(let b=n-1;b>=0;b--) combo.push((mask>>b)&1);
+      const r = mpCompute(mpState.preset, combo);
+      const isCurrent = combo.every((v,i)=>v===mpState.inputs[i]);
+      const tr = document.createElement('tr');
+      if(isCurrent) tr.className = 'current';
+      tr.innerHTML = combo.map(v=>`<td>${v}</td>`).join('') + `<td>${r.sum}</td><td>${r.fires}</td>`;
+      tbody.appendChild(tr);
+    }
+  }
+
+  document.getElementById('mpPresetMode').addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('active', b===btn));
+    mpState.preset = btn.dataset.v;
+    mpState.inputs = new Array(MP_PRESETS[mpState.preset].inputs).fill(0);
+    renderMp();
+  });
+
+  renderMp();
+
+  // ============================================================
+  // §2 Perceptron engine — Rosenblatt's learning rule
+  // ============================================================
+  const PT_THRESHOLD = 1.5, PT_LR = 1, PT_DATA = [[0,0,0],[0,1,0],[1,0,0],[1,1,1]];
+  const ptState = { w1:0, w2:0, i:0 };
+
+  function ptPredict(w1,w2,x1,x2){ return (w1*x1 + w2*x2) >= PT_THRESHOLD ? 1 : 0; }
+  function ptAccuracy(w1,w2){ return PT_DATA.filter(([x1,x2,t])=>ptPredict(w1,w2,x1,x2)===t).length; }
+
+  function renderPtDataTable(){
+    const tbody = document.getElementById('ptDataBody');
+    tbody.innerHTML = '';
+    PT_DATA.forEach(([x1,x2,t],i)=>{
+      const tr = document.createElement('tr');
+      if(i===ptState.i) tr.className = 'current';
+      tr.innerHTML = `<td>${x1}</td><td>${x2}</td><td>${t}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderPt(){
+    renderPtDataTable();
+    const [x1,x2,target] = PT_DATA[ptState.i];
+    const pred = ptPredict(ptState.w1, ptState.w2, x1, x2);
+    const err = target - pred;
+    document.getElementById('ptStepLine').innerHTML =
+      `example (x<sub>1</sub>=${x1}, x<sub>2</sub>=${x2}), target = ${target}<br>` +
+      `sum = ${ptState.w1}&times;${x1} + ${ptState.w2}&times;${x2} = ${(ptState.w1*x1+ptState.w2*x2).toFixed(0)} &nbsp;&rarr;&nbsp; prediction = <b>${pred}</b><br>` +
+      `error = target &minus; prediction = <b>${err}</b>`;
+    document.getElementById('ptWeights').innerHTML = vecRowHTML([ptState.w1, ptState.w2]);
+    document.getElementById('ptAccuracy').textContent = `${ptAccuracy(ptState.w1, ptState.w2)}/4`;
+    const done = ptAccuracy(ptState.w1, ptState.w2) === 4;
+    document.getElementById('ptDoneNote').style.display = done ? 'block' : 'none';
+  }
+
+  let ptTimer = null, ptPlaying = false;
+  function stopPtAutoplay(){
+    ptPlaying = false;
+    if(ptTimer){ clearInterval(ptTimer); ptTimer = null; }
+    document.getElementById('ptPlayBtn').textContent = 'Auto-train';
+  }
+  function ptTrainStep(){
+    const [x1,x2,target] = PT_DATA[ptState.i];
+    const pred = ptPredict(ptState.w1, ptState.w2, x1, x2);
+    const err = target - pred;
+    ptState.w1 += PT_LR*err*x1;
+    ptState.w2 += PT_LR*err*x2;
+    ptState.i = (ptState.i + 1) % PT_DATA.length;
+    renderPt();
+    if(ptAccuracy(ptState.w1, ptState.w2) === 4) stopPtAutoplay();
+  }
+  function startPtAutoplay(){
+    ptPlaying = true;
+    document.getElementById('ptPlayBtn').textContent = 'Stop';
+    ptTimer = setInterval(ptTrainStep, 550);
+  }
+
+  document.getElementById('ptStepBtn').addEventListener('click', ()=>{ stopPtAutoplay(); ptTrainStep(); });
+  document.getElementById('ptPlayBtn').addEventListener('click', ()=>{ ptPlaying ? stopPtAutoplay() : startPtAutoplay(); });
+  document.getElementById('ptResetBtn').addEventListener('click', ()=>{
+    stopPtAutoplay(); ptState.w1=0; ptState.w2=0; ptState.i=0; renderPt();
+  });
+
+  renderPt();
+
+  // ============================================================
+  // §4 Backpropagation engine — real gradient descent via the chain rule
+  // ============================================================
+  const BP_X = 2, BP_Y = 12, BP_LR = 0.01, BP_MAX_STEPS = 14;
+  const bpState = { w1:0.5, w2:0.5, history:[] };
+
+  function bpForwardBackward(w1, w2){
+    const h = BP_X*w1;
+    const pred = h*w2;
+    const err = pred - BP_Y;
+    const loss = err*err;
+    const dPred = 2*err;
+    const dW2 = dPred*h;
+    const dW1 = dPred*w2*BP_X;
+    return { h, pred, err, loss, dW1, dW2 };
+  }
+
+  function renderBpDiagram(){
+    const el = document.getElementById('bpDiagram');
+    const steps = [['input','x = 2'], ['× w₁','h'], ['× w₂','prediction'], ['vs y = 12','loss']];
+    const bw=104, bh=44, gap=18, y=10;
+    const w = steps.length*bw + (steps.length-1)*gap + 20;
+    let svg = `<svg viewBox="0 0 ${w} 108" width="${w}" height="108" style="color:var(--ink)">`;
+    steps.forEach((s,i)=>{
+      const x = 10 + i*(bw+gap);
+      svg += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" fill="none" stroke="currentColor" stroke-width="1.3"/>`;
+      svg += `<text x="${x+bw/2}" y="${y+18}" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">${s[0]}</text>`;
+      svg += `<text x="${x+bw/2}" y="${y+32}" text-anchor="middle" font-size="10.5" fill="currentColor">${s[1]}</text>`;
+      if(i<steps.length-1){
+        const ax=x+bw, ax2=x+bw+gap;
+        svg += `<line x1="${ax+3}" y1="${y+bh/2}" x2="${ax2-6}" y2="${y+bh/2}" stroke="currentColor" stroke-width="1.3"/>`;
+        svg += `<polygon points="${ax2-6},${y+bh/2-4} ${ax2},${y+bh/2} ${ax2-6},${y+bh/2+4}" fill="currentColor"/>`;
+      }
+    });
+    const by = y+bh+24;
+    svg += `<line x1="${w-14}" y1="${by}" x2="14" y2="${by}" stroke="var(--mark)" stroke-width="1.8"/>`;
+    svg += `<polygon points="14,${by-5} 14,${by+5} 5,${by}" fill="var(--mark)"/>`;
+    svg += `<text x="${w/2}" y="${by+18}" text-anchor="middle" font-size="9" fill="var(--mark)" font-weight="600">gradients flow backward, layer by layer</text>`;
+    svg += `</svg>`;
+    el.innerHTML = svg;
+  }
+
+  function renderBpLossHistory(){
+    const container = document.getElementById('bpLossHistory');
+    container.innerHTML = '';
+    const first = bpState.history[0] || 1;
+    bpState.history.forEach((loss,i)=>{
+      const row = document.createElement('div');
+      row.className = 'prob-row';
+      const pct = Math.max(0.5, Math.min(100, (loss/first)*100));
+      row.innerHTML = `<div class="prob-w">step ${i+1}</div><div class="prob-track"><div class="prob-fill" style="width:${pct.toFixed(1)}%"></div></div><div class="prob-num">${loss.toFixed(3)}</div>`;
+      container.appendChild(row);
+    });
+  }
+
+  function renderBp(){
+    const r = bpForwardBackward(bpState.w1, bpState.w2);
+    document.getElementById('bpForward').innerHTML =
+      `h = x &middot; w<sub>1</sub> = ${BP_X} &times; ${bpState.w1.toFixed(3)} = <b>${r.h.toFixed(3)}</b><br>` +
+      `prediction = h &middot; w<sub>2</sub> = ${r.h.toFixed(3)} &times; ${bpState.w2.toFixed(3)} = <b>${r.pred.toFixed(3)}</b><br>` +
+      `target y = ${BP_Y} &nbsp;&rarr;&nbsp; loss = (prediction &minus; y)&sup2; = <b>${r.loss.toFixed(3)}</b>`;
+    document.getElementById('bpBackward').innerHTML =
+      `&part;loss/&part;prediction = 2(prediction &minus; y) = <b>${(2*r.err).toFixed(3)}</b><br>` +
+      `&part;loss/&part;w<sub>2</sub> = (&part;loss/&part;prediction) &times; h = <b>${r.dW2.toFixed(3)}</b><br>` +
+      `&part;loss/&part;w<sub>1</sub> = (&part;loss/&part;prediction) &times; w<sub>2</sub> &times; x = <b>${r.dW1.toFixed(3)}</b>`;
+    const newW1 = bpState.w1 - BP_LR*r.dW1, newW2 = bpState.w2 - BP_LR*r.dW2;
+    document.getElementById('bpUpdate').innerHTML =
+      `w<sub>1</sub> &larr; ${bpState.w1.toFixed(3)} &minus; (0.01 &times; ${r.dW1.toFixed(3)}) = <b>${newW1.toFixed(3)}</b><br>` +
+      `w<sub>2</sub> &larr; ${bpState.w2.toFixed(3)} &minus; (0.01 &times; ${r.dW2.toFixed(3)}) = <b>${newW2.toFixed(3)}</b>`;
+    renderBpLossHistory();
+    document.getElementById('bpDoneNote').style.display = bpState.history.length >= BP_MAX_STEPS ? 'block' : 'none';
+    document.getElementById('bpStepBtn').disabled = bpState.history.length >= BP_MAX_STEPS;
+  }
+
+  let bpTimer = null, bpPlaying = false;
+  function stopBpAutoplay(){
+    bpPlaying = false;
+    if(bpTimer){ clearInterval(bpTimer); bpTimer = null; }
+    document.getElementById('bpPlayBtn').textContent = 'Auto-train';
+  }
+  function bpTrainStep(){
+    if(bpState.history.length >= BP_MAX_STEPS){ stopBpAutoplay(); return; }
+    const r = bpForwardBackward(bpState.w1, bpState.w2);
+    bpState.history.push(r.loss);
+    bpState.w1 -= BP_LR*r.dW1;
+    bpState.w2 -= BP_LR*r.dW2;
+    renderBp();
+    if(bpState.history.length >= BP_MAX_STEPS) stopBpAutoplay();
+  }
+  function startBpAutoplay(){
+    if(bpState.history.length >= BP_MAX_STEPS){ bpState.w1=0.5; bpState.w2=0.5; bpState.history=[]; }
+    bpPlaying = true;
+    document.getElementById('bpPlayBtn').textContent = 'Stop';
+    bpTimer = setInterval(bpTrainStep, 550);
+  }
+
+  document.getElementById('bpStepBtn').addEventListener('click', ()=>{ stopBpAutoplay(); bpTrainStep(); });
+  document.getElementById('bpPlayBtn').addEventListener('click', ()=>{ bpPlaying ? stopBpAutoplay() : startBpAutoplay(); });
+  document.getElementById('bpResetBtn').addEventListener('click', ()=>{
+    stopBpAutoplay(); bpState.w1=0.5; bpState.w2=0.5; bpState.history=[]; renderBp();
+  });
+
+  renderBpDiagram();
+  renderBp();
+
+  // ============================================================
+  // §3 Multi-Layer Perceptron engine — XOR + fixed-window slider
+  // ============================================================
+  const xorState = { x1:0, x2:0 };
+
+  function xorCompute(x1,x2){
+    const h1 = (x1 + x2) >= 1 ? 1 : 0;     // OR
+    const h2 = (-x1 - x2) >= -1 ? 1 : 0;   // NAND
+    const out = (h1 + h2) >= 2 ? 1 : 0;    // AND(h1,h2) = XOR(x1,x2)
+    return { h1, h2, out };
+  }
+
+  function renderXor(){
+    const inputsEl = document.getElementById('xorInputs');
+    inputsEl.innerHTML = '';
+    [xorState.x1, xorState.x2].forEach((v,i)=>{
+      const btn = document.createElement('button');
+      btn.className = 'mp-input-btn' + (v===1 ? ' on' : '');
+      btn.innerHTML = `x<sub>${i+1}</sub> = <b>${v}</b>`;
+      btn.addEventListener('click', ()=>{
+        if(i===0) xorState.x1 = xorState.x1===0 ? 1 : 0; else xorState.x2 = xorState.x2===0 ? 1 : 0;
+        renderXor();
+      });
+      inputsEl.appendChild(btn);
+    });
+
+    const { h1, h2, out } = xorCompute(xorState.x1, xorState.x2);
+    document.getElementById('xorH1').classList.toggle('firing', h1===1);
+    document.getElementById('xorH2').classList.toggle('firing', h2===1);
+    document.getElementById('xorOut').classList.toggle('firing', out===1);
+    document.getElementById('xorOutLabel').textContent = out===1 ? 'fires → 1 (XOR)' : 'silent → 0';
+
+    const tbody = document.getElementById('xorTruthBody');
+    tbody.innerHTML = '';
+    [[0,0],[0,1],[1,0],[1,1]].forEach(([x1,x2])=>{
+      const r = xorCompute(x1,x2);
+      const tr = document.createElement('tr');
+      if(x1===xorState.x1 && x2===xorState.x2) tr.className = 'current';
+      tr.innerHTML = `<td>${x1}</td><td>${x2}</td><td>${r.h1}</td><td>${r.h2}</td><td>${r.out}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  renderXor();
+
+  const mlpState = { windowSize:2, pos:2 };
+
+  function renderMlpWindow(){
+    const ws = mlpState.windowSize;
+    mlpState.pos = Math.max(ws, Math.min(mlpState.pos, CHAIN_WORDS.length-1));
+
+    const strip = document.getElementById('mlpTokenStrip');
+    strip.innerHTML = '';
+    CHAIN_WORDS.forEach((w,i)=>{
+      const span = document.createElement('span');
+      let cls = 'rnn-token';
+      if(i >= mlpState.pos-ws && i < mlpState.pos) cls += ' inwindow';
+      else if(i === mlpState.pos) cls += ' target';
+      else cls += ' outside';
+      span.className = cls;
+      span.textContent = w;
+      strip.appendChild(span);
+    });
+
+    const windowWords = CHAIN_WORDS.slice(mlpState.pos-ws, mlpState.pos).join(' ');
+    const targetWord = CHAIN_WORDS[mlpState.pos];
+    const outsideCount = mlpState.pos - ws;
+    let caption = `Window = "${windowWords}" &rarr; predicting "${targetWord}"`;
+    if(outsideCount > 0) caption += ` &mdash; ${outsideCount} word${outsideCount>1?'s':''} further back ${outsideCount>1?'are':'is'} invisible to this network.`;
+    document.getElementById('mlpWindowCaption').innerHTML = caption;
+    document.getElementById('mlpNextBtn').disabled = mlpState.pos >= CHAIN_WORDS.length-1;
+  }
+
+  document.getElementById('mlpWindowMode').addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('active', b===btn));
+    mlpState.windowSize = parseInt(btn.dataset.v,10);
+    mlpState.pos = mlpState.windowSize;
+    renderMlpWindow();
+  });
+  document.getElementById('mlpNextBtn').addEventListener('click', ()=>{
+    if(mlpState.pos < CHAIN_WORDS.length-1) mlpState.pos++;
+    renderMlpWindow();
+  });
+  document.getElementById('mlpResetBtn').addEventListener('click', ()=>{
+    mlpState.pos = mlpState.windowSize;
+    renderMlpWindow();
+  });
+
+  renderMlpWindow();
+
+  // ============================================================
+  // §5 Embeddings engine — hand-placed 2D word map, real nearest-neighbor
+  // ============================================================
+  const EMBED_WORDS = {
+    cat: [1.5, 8.0], dog: [2.2, 8.6], lion: [0.8, 7.3], mouse: [2.6, 7.4],
+    car: [7.8, 1.6], truck: [8.6, 2.0], bike: [7.0, 0.8], train: [8.2, 2.8],
+    king: [4.8, 5.0], queen: [5.3, 5.4],
+  };
+  const embedState = { selected: 'cat' };
+
+  function embedDist(a,b){ const dx=a[0]-b[0], dy=a[1]-b[1]; return Math.sqrt(dx*dx+dy*dy); }
+
+  function embedNearestNeighbor(word){
+    let best=null, bestDist=Infinity;
+    const p = EMBED_WORDS[word];
+    Object.entries(EMBED_WORDS).forEach(([w,coords])=>{
+      if(w===word) return;
+      const d = embedDist(p, coords);
+      if(d<bestDist){ bestDist=d; best=w; }
+    });
+    return { word: best, dist: bestDist };
+  }
+
+  function renderEmbedMap(){
+    const scale = 30, margin = 20, size = 320;
+    const sel = embedState.selected;
+    const selP = EMBED_WORDS[sel];
+    const nn = embedNearestNeighbor(sel);
+    const nnP = EMBED_WORDS[nn.word];
+    const toX = x => margin + x*scale;
+    const toY = y => size - margin - y*scale;
+
+    let html = `<line x1="${toX(selP[0])}" y1="${toY(selP[1])}" x2="${toX(nnP[0])}" y2="${toY(nnP[1])}" stroke="var(--mark)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+    Object.entries(EMBED_WORDS).forEach(([w,coords])=>{
+      const x = toX(coords[0]), y = toY(coords[1]);
+      const isSel = w===sel, isNN = w===nn.word;
+      const r = isSel ? 7 : 5;
+      const stroke = (isSel || isNN) ? 'var(--mark)' : 'currentColor';
+      html += `<g data-word="${w}" style="cursor:pointer">` +
+        `<circle cx="${x}" cy="${y}" r="${r+9}" fill="transparent"/>` +
+        `<circle cx="${x}" cy="${y}" r="${r}" fill="var(--surface)" stroke="${stroke}" stroke-width="${(isSel||isNN)?2.2:1.3}"/>` +
+        `<text x="${x}" y="${y-12}" text-anchor="middle" font-size="11" fill="${isSel?'var(--mark)':'currentColor'}" font-weight="${isSel?700:400}">${w}</text>` +
+        `</g>`;
+    });
+    const svg = document.getElementById('embedMap');
+    svg.innerHTML = html;
+    svg.style.color = 'var(--ink)';
+
+    document.getElementById('embedInfo').innerHTML =
+      `"${sel}" &rarr; embedding = (${selP[0].toFixed(1)}, ${selP[1].toFixed(1)})<br>` +
+      `nearest neighbor: <b>${nn.word}</b> at (${nnP[0].toFixed(1)}, ${nnP[1].toFixed(1)}), distance = <b>${nn.dist.toFixed(2)}</b>`;
+  }
+
+  document.getElementById('embedMap').addEventListener('click', e=>{
+    const g = e.target.closest('[data-word]');
+    if(!g) return;
+    embedState.selected = g.dataset.word;
+    renderEmbedMap();
+  });
+
+  renderEmbedMap();
+
+  // ============================================================
+  // §6 RNN engine — real tanh hidden-state recurrence, untrained
+  // ============================================================
+  function embed(word, dim){ const rand = mulberry32(hashStr(word.toLowerCase())); const v=[]; for(let i=0;i<dim;i++) v.push(gaussianish(rand)*0.6); return v; }
+  function randMatrix(rows, cols, seed, scale=0.5){ const rand = mulberry32(seed); const M=[]; for(let r=0;r<rows;r++){ const row=[]; for(let c=0;c<cols;c++) row.push(gaussianish(rand)*scale); M.push(row); } return M; }
+  function matMul(A,B){ const n=A.length,k=B.length,m=B[0].length; const out=[]; for(let i=0;i<n;i++){ const row=new Array(m).fill(0); for(let j=0;j<m;j++){ let s=0; for(let t=0;t<k;t++) s+=A[i][t]*B[t][j]; row[j]=s; } out.push(row); } return out; }
+  function vecMatMul(v, W){ const m=W[0].length; const out=new Array(m).fill(0); for(let j=0;j<m;j++){ let s=0; for(let i=0;i<v.length;i++) s+=v[i]*W[i][j]; out[j]=s; } return out; }
+  function dot(a,b){ let s=0; for(let i=0;i<a.length;i++) s+=a[i]*b[i]; return s; }
+  function softmaxRow(row){ const max=Math.max(...row); const exps=row.map(v=>Math.exp(v-max)); const sum=exps.reduce((a,b)=>a+b,0); return exps.map(v=>v/sum); }
+  function cleanWord(w){ return w.toLowerCase().replace(/[^a-z']/g,''); }
+
+  const D = 8, HEADS = 4, DH = D/HEADS;
+
+  const RNN_WX = randMatrix(D, D, 601, 1.3);
+  const RNN_WH = randMatrix(D, D, 602, 1.3);
+
+  function computeRnnStates(){
+    const states = [new Array(D).fill(0)];
+    let h = states[0];
+    CHAIN_WORDS.forEach(w=>{
+      const x = embed(cleanWord(w), D);
+      const a = vecMatMul(x, RNN_WX);
+      const b = vecMatMul(h, RNN_WH);
+      h = a.map((v,i)=>Math.tanh(v+b[i]));
+      states.push(h);
+    });
+    return states; // [h0 (zeros), h1, h2, ..., h6]
+  }
+  const RNN_STATES = computeRnnStates();
+  const rnnState = { step: 0 };
+
+  function renderRnnStep(){
+    const strip = document.getElementById('rnnTokenStrip');
+    strip.innerHTML = '';
+    CHAIN_WORDS.forEach((w,i)=>{
+      const span = document.createElement('span');
+      span.className = 'rnn-token' + (i < rnnState.step-1 ? ' read' : i===rnnState.step-1 ? ' current' : '');
+      span.textContent = w;
+      strip.appendChild(span);
+    });
+
+    const caption = document.getElementById('rnnStepCaption');
+    caption.textContent = rnnState.step===0
+      ? 'Before reading anything — hidden state starts at all zeros.'
+      : `Step ${rnnState.step} of ${CHAIN_WORDS.length} — hidden state after reading "${CHAIN_WORDS.slice(0, rnnState.step).join(' ')}"`;
+
+    document.getElementById('rnnHiddenState').innerHTML = vecRowHTML(RNN_STATES[rnnState.step]);
+    document.getElementById('rnnFinalNote').style.display = rnnState.step===CHAIN_WORDS.length ? 'block' : 'none';
+    document.getElementById('rnnNextBtn').disabled = rnnState.step===CHAIN_WORDS.length;
+  }
+
+  let rnnTimer = null, rnnPlaying = false;
+  function stopRnnAutoplay(){
+    rnnPlaying = false;
+    if(rnnTimer){ clearInterval(rnnTimer); rnnTimer = null; }
+    document.getElementById('rnnPlayBtn').textContent = 'Auto-play';
+  }
+  function rnnStepForward(){
+    if(rnnState.step < CHAIN_WORDS.length){ rnnState.step++; renderRnnStep(); }
+    if(rnnState.step >= CHAIN_WORDS.length) stopRnnAutoplay();
+  }
+  function startRnnAutoplay(){
+    if(rnnState.step >= CHAIN_WORDS.length) rnnState.step = 0;
+    rnnPlaying = true;
+    document.getElementById('rnnPlayBtn').textContent = 'Stop';
+    rnnTimer = setInterval(rnnStepForward, 700);
+  }
+
+  document.getElementById('rnnNextBtn').addEventListener('click', ()=>{ stopRnnAutoplay(); rnnStepForward(); });
+  document.getElementById('rnnPlayBtn').addEventListener('click', ()=>{ rnnPlaying ? stopRnnAutoplay() : startRnnAutoplay(); });
+  document.getElementById('rnnResetBtn').addEventListener('click', ()=>{ stopRnnAutoplay(); rnnState.step = 0; renderRnnStep(); });
+
+  renderRnnStep();
+
+  // ============================================================
+  // §7 Attention engine
+  // ============================================================
+  const Wq = randMatrix(D,D,11), Wk = randMatrix(D,D,22), Wv = randMatrix(D,D,33);
+  const WqH = Array.from({length:HEADS}, (_,h)=>randMatrix(D,DH,101+h));
+  const WkH = Array.from({length:HEADS}, (_,h)=>randMatrix(D,DH,201+h));
+  const BOOST_PAIRS = [{q:'it', k:'animal', amt:8}, {q:'cross', k:'street', amt:8}];
+
+  function computeAttentionFull(tokens, trained, isExample){
+    const X = tokens.map(t=>embed(cleanWord(t), D));
+    const Q = matMul(X,Wq), K = matMul(X,Wk), V = matMul(X,Wv);
+    const scaled = Q.map(qrow => K.map(krow => dot(qrow,krow)/Math.sqrt(D)));
+    if(trained && isExample){
+      const clean = tokens.map(cleanWord);
+      BOOST_PAIRS.forEach(({q,k,amt})=>{
+        const qi=clean.indexOf(q), ki=clean.indexOf(k);
+        if(qi>=0 && ki>=0) scaled[qi][ki]+=amt;
+      });
+    }
+    const weights = scaled.map(softmaxRow);
+    return { weights, X, Q, K, V };
+  }
+
+  function computeHeadsAttention(tokens, trained, isExample){
+    const X = tokens.map(t=>embed(cleanWord(t), D));
+    const clean = tokens.map(cleanWord);
+    const results = [];
+    for(let h=0; h<HEADS; h++){
+      const Q = matMul(X,WqH[h]), K = matMul(X,WkH[h]);
+      const scaled = Q.map(qrow => K.map(krow => dot(qrow,krow)/Math.sqrt(DH)));
+      if(trained && isExample && h<BOOST_PAIRS.length){
+        const {q,k,amt} = BOOST_PAIRS[h];
+        const qi=clean.indexOf(q), ki=clean.indexOf(k);
+        if(qi>=0 && ki>=0) scaled[qi][ki]+=amt;
+      }
+      results.push(scaled.map(softmaxRow));
+    }
+    return results;
+  }
+
+  const EXAMPLE_SENTENCE = "The animal didn't cross the street because it was too tired";
+  function tokenize(s){ return s.trim().split(/\s+/).filter(Boolean); }
+  const attnState = { mode:'example', trained:true, heads:'1', query: Math.max(0, tokenize(EXAMPLE_SENTENCE).indexOf('it')) };
+
+  function currentSentence(){
+    return attnState.mode==='example' ? EXAMPLE_SENTENCE : document.getElementById('customSentence').value;
+  }
+
+  function renderPipeline(){
+    const el = document.getElementById('pipeline');
+    if(el.dataset.built) return;
+    el.dataset.built = '1';
+    const steps = [
+      ['word', '"it"'],
+      ['embed', 'vector x'],
+      ['× Wq / Wk / Wv', 'Q, K, V'],
+      ['Q · K', 'score'],
+      ['÷ √8, softmax', 'weight'],
+      ['× V', 'output'],
+    ];
+    const bw = 90, bh = 44, gap = 16, y = 10;
+    const w = steps.length*bw + (steps.length-1)*gap + 20;
+    let svg = `<svg viewBox="0 0 ${w} 74" width="${w}" height="74" style="color:var(--ink)">`;
+    steps.forEach((s,i)=>{
+      const x = 10 + i*(bw+gap);
+      const isWeight = s[1]==='weight';
+      svg += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" fill="none" stroke="${isWeight?'var(--mark)':'currentColor'}" stroke-width="${isWeight?2:1.3}"/>`;
+      svg += `<text x="${x+bw/2}" y="${y+18}" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">${s[0]}</text>`;
+      svg += `<text x="${x+bw/2}" y="${y+32}" text-anchor="middle" font-size="10.5" fill="${isWeight?'var(--mark)':'currentColor'}" font-weight="${isWeight?700:400}">${s[1]}</text>`;
+      if(i<steps.length-1){
+        const ax = x+bw, ax2 = x+bw+gap;
+        svg += `<line x1="${ax+3}" y1="${y+bh/2}" x2="${ax2-6}" y2="${y+bh/2}" stroke="currentColor" stroke-width="1.3"/>`;
+        svg += `<polygon points="${ax2-6},${y+bh/2-4} ${ax2},${y+bh/2} ${ax2-6},${y+bh/2+4}" fill="currentColor"/>`;
+      }
+    });
+    svg += `</svg>`;
+    el.innerHTML = svg;
+  }
+
+  function vecRowHTML(vec, extraClass){
+    return vec.map(v=>`<div class="vec-cell">${v>=0?' ':''}${v.toFixed(2)}</div>`).join('');
+  }
+
+  function renderLiveVectors(tokens, X, Q, K, V){
+    const i = attnState.query;
+    document.getElementById('liveWordLabel').textContent = tokens[i];
+    const el = document.getElementById('liveVectors');
+    el.innerHTML = `
+      <div class="vecblock"><div class="vecblock-label"><b>x</b> — embedding of "${tokens[i]}"</div><div class="vec-row row-x">${vecRowHTML(X[i])}</div></div>
+      <div class="vecblock"><div class="vecblock-label"><b>Q</b> = x &middot; Wq</div><div class="vec-row row-q">${vecRowHTML(Q[i])}</div></div>
+      <div class="vecblock"><div class="vecblock-label"><b>K</b> = x &middot; Wk</div><div class="vec-row">${vecRowHTML(K[i])}</div></div>
+      <div class="vecblock"><div class="vecblock-label"><b>V</b> = x &middot; Wv</div><div class="vec-row">${vecRowHTML(V[i])}</div></div>
+    `;
+  }
+
+  function renderAttention(){
+    const isExample = attnState.mode==='example';
+    document.getElementById('customRow').style.display = isExample ? 'none' : 'block';
+    document.getElementById('trainedNote').style.display = isExample ? 'none' : 'block';
+    const trainedBtns = document.querySelectorAll('#trainedMode button');
+    trainedBtns.forEach(b=>{ b.disabled = !isExample; });
+    const effectiveTrained = isExample && attnState.trained;
+
+    const tokens = tokenize(currentSentence());
+    if(!tokens.length){ return; }
+    if(attnState.query >= tokens.length) attnState.query = 0;
+
+    const strip = document.getElementById('tokenStrip');
+    strip.innerHTML = '';
+    tokens.forEach((tok,i)=>{
+      const b = document.createElement('button');
+      b.className = 'token' + (i===attnState.query ? ' active' : '');
+      b.textContent = tok;
+      b.setAttribute('aria-pressed', i===attnState.query ? 'true' : 'false');
+      b.addEventListener('click', ()=>{ attnState.query=i; renderAttention(); });
+      strip.appendChild(b);
+    });
+
+    document.getElementById('singleHeadView').style.display = attnState.heads==='1' ? 'block' : 'none';
+    document.getElementById('headsView').style.display = attnState.heads==='4' ? 'block' : 'none';
+
+    if(attnState.heads==='1'){
+      const { weights, X, Q, K, V } = computeAttentionFull(tokens, effectiveTrained, isExample);
+      const row = weights[attnState.query];
+
+      const render = document.getElementById('sentenceRender');
+      render.innerHTML = '';
+      tokens.forEach((tok,i)=>{
+        const span = document.createElement('span');
+        const w = row[i];
+        span.style.background = `rgba(var(--mark-rgb), ${(w*0.85).toFixed(3)})`;
+        if(i===attnState.query) span.classList.add('query');
+        span.textContent = tok + (i<tokens.length-1 ? ' ' : '');
+        render.appendChild(span);
+      });
+
+      const order = tokens.map((t,i)=>i).sort((a,b)=>row[b]-row[a]);
+      const list = document.getElementById('rankList');
+      list.innerHTML = '';
+      order.forEach((i,rank)=>{
+        const w = row[i];
+        const rowEl = document.createElement('div');
+        rowEl.className = 'rank-row';
+        rowEl.innerHTML = `<span class="rank-i">${rank+1}</span><span class="rank-tok">${tokens[i]}${i===attnState.query?' <span class="self-tag">(self)</span>':''}</span><span class="rank-bar-track"><span class="rank-bar-fill" style="width:${(w*100).toFixed(1)}%"></span></span><span class="rank-num">${w.toFixed(3)}</span>`;
+        list.appendChild(rowEl);
+      });
+      renderPipeline();
+      renderLiveVectors(tokens, X, Q, K, V);
+    } else {
+      const heads = computeHeadsAttention(tokens, effectiveTrained, isExample);
+      const grid = document.getElementById('headsGrid');
+      grid.innerHTML = '';
+      const captions = [
+        'Nudged toward pronoun → referent ("it" → "animal") when Trained is on.',
+        'Nudged toward verb → object ("cross" → "street") when Trained is on.',
+        'Left random — stands in for a pattern this head would specialise in given real training.',
+        'Left random — stands in for a pattern this head would specialise in given real training.'
+      ];
+      heads.forEach((weights,h)=>{
+        const card = document.createElement('div');
+        card.className = 'head-card';
+        const n = tokens.length;
+        let cells = '';
+        for(let i=0;i<n;i++) for(let j=0;j<n;j++){
+          const w = weights[i][j];
+          cells += `<div class="heat-cell" style="background:rgba(var(--mark-rgb), ${(w*0.85).toFixed(3)})" title="${tokens[i]} → ${tokens[j]}: ${w.toFixed(2)}"></div>`;
+        }
+        card.innerHTML = `<h3>Head ${h}</h3><div class="head-caption">${effectiveTrained || h>=2 ? captions[h] : 'Random (enable Trained + Example sentence to see the specialised pattern).'}</div><div class="heat-grid" style="grid-template-columns:repeat(${n},1fr)">${cells}</div>`;
+        grid.appendChild(card);
+      });
+    }
+  }
+
+  document.getElementById('sentMode').addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('active', b===btn));
+    attnState.mode = btn.dataset.v; attnState.query = attnState.mode==='example' ? Math.max(0, tokenize(EXAMPLE_SENTENCE).indexOf('it')) : 0;
+    renderAttention();
+  });
+  document.getElementById('headMode').addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('active', b===btn));
+    attnState.heads = btn.dataset.v; renderAttention();
+  });
+  document.getElementById('trainedMode').addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn || btn.disabled) return;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('active', b===btn));
+    attnState.trained = btn.dataset.v==='trained'; renderAttention();
+  });
+  document.getElementById('customSentence').addEventListener('input', ()=>{ attnState.query=0; renderAttention(); });
+
+  renderAttention();
+
+  // ============================================================
+  // §8 Before Transformers — static diagrams + alignment grid
+  // ============================================================
+  function renderRnnPathDiagram(elId){
+    const n = CHAIN_WORDS.length, r = 10, gap = 54, x0 = 12, y = 30;
+    const w = x0*2 + gap*(n-1), h = 66;
+    let svg = `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="color:var(--ink)">`;
+    for(let i=0;i<n-1;i++){
+      const x1 = x0+i*gap+r, x2 = x0+(i+1)*gap-r;
+      svg += `<line x1="${x1+3}" y1="${y}" x2="${x2-5}" y2="${y}" stroke="var(--mark)" stroke-width="2"/>`;
+      svg += `<polygon points="${x2-5},${y-4} ${x2},${y} ${x2-5},${y+4}" fill="var(--mark)"/>`;
+    }
+    for(let i=0;i<n;i++){
+      const cx = x0+i*gap;
+      const hl = i===0 || i===n-1;
+      svg += `<circle cx="${cx}" cy="${y}" r="${r}" fill="var(--surface)" stroke="${hl?'var(--mark)':'currentColor'}" stroke-width="${hl?2.4:1.3}"/>`;
+      svg += `<text x="${cx}" y="${y+4}" text-anchor="middle" font-size="9.5" fill="${hl?'var(--mark)':'currentColor'}" font-weight="${hl?700:400}">h${i+1}</text>`;
+      svg += `<text x="${cx}" y="${y+30}" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.6">${CHAIN_WORDS[i]}</text>`;
+    }
+    svg += `<text x="${x0+(n-1)*gap/2}" y="${y-22}" text-anchor="middle" font-size="9.5" fill="var(--mark)" font-weight="600">5 hops, in order</text>`;
+    svg += `</svg>`;
+    document.getElementById(elId).innerHTML = svg;
+  }
+
+  function renderTransformerDiagram(elId){
+    const n = CHAIN_WORDS.length, r = 10, gap = 54, x0 = 12, y = 46;
+    const w = x0*2 + gap*(n-1);
+    let svg = `<svg viewBox="0 0 ${w} 82" width="${w}" height="82" style="color:var(--ink)">`;
+    for(let i=0;i<n;i++){
+      for(let j=i+1;j<n;j++){
+        if(i===0 && j===n-1) continue;
+        const x1=x0+i*gap, x2=x0+j*gap, dist=j-i;
+        const midx=(x1+x2)/2, ctrlY = y - Math.min(dist*6, 32);
+        svg += `<path d="M${x1},${y} Q${midx},${ctrlY} ${x2},${y}" fill="none" stroke="currentColor" stroke-width="1" opacity="0.18"/>`;
+      }
+    }
+    {
+      const x1=x0, x2=x0+(n-1)*gap, midx=(x1+x2)/2, ctrlY = y - 33;
+      svg += `<path d="M${x1},${y} Q${midx},${ctrlY} ${x2},${y}" fill="none" stroke="var(--mark)" stroke-width="2.2"/>`;
+    }
+    for(let i=0;i<n;i++){
+      const cx = x0+i*gap;
+      const hl = i===0 || i===n-1;
+      svg += `<circle cx="${cx}" cy="${y}" r="${r}" fill="var(--surface)" stroke="${hl?'var(--mark)':'currentColor'}" stroke-width="${hl?2.4:1.3}"/>`;
+      svg += `<text x="${cx}" y="${y+4}" text-anchor="middle" font-size="9.5" fill="${hl?'var(--mark)':'currentColor'}" font-weight="${hl?700:400}">h${i+1}</text>`;
+      svg += `<text x="${cx}" y="${y+30}" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.6">${CHAIN_WORDS[i]}</text>`;
+    }
+    svg += `<text x="${x0+(n-1)*gap/2}" y="10" text-anchor="middle" font-size="9.5" fill="var(--mark)" font-weight="600">1 hop, any distance</text>`;
+    svg += `</svg>`;
+    document.getElementById(elId).innerHTML = svg;
+  }
+
+  const EN_WORDS = ['the','black','cat'], IT_WORDS = ['il','gatto','nero'];
+  function computeAlignment(){
+    const enX = EN_WORDS.map(w=>embed(cleanWord(w), D));
+    const itX = IT_WORDS.map(w=>embed(cleanWord(w), D));
+    const Qit = matMul(itX, Wq), Ken = matMul(enX, Wk);
+    const scaled = Qit.map(qrow => Ken.map(krow => dot(qrow,krow)/Math.sqrt(D)));
+    const pairs = [{f:'il',e:'the'},{f:'gatto',e:'cat'},{f:'nero',e:'black'}];
+    pairs.forEach(({f,e})=>{
+      const fi=IT_WORDS.indexOf(f), ei=EN_WORDS.indexOf(e);
+      scaled[fi][ei]+=8;
+    });
+    return scaled.map(softmaxRow);
+  }
+
+  function renderAlignGrid(){
+    const weights = computeAlignment();
+    const el = document.getElementById('alignGrid');
+    let html = '<thead><tr><th></th>' + EN_WORDS.map(w=>`<th>${w}</th>`).join('') + '</tr></thead><tbody>';
+    IT_WORDS.forEach((fw,i)=>{
+      html += `<tr><th>${fw}</th>` + EN_WORDS.map((ew,j)=>{
+        const w = weights[i][j];
+        return `<td style="background:rgba(var(--mark-rgb), ${(w*0.85).toFixed(3)})" title="${fw} → ${ew}: ${w.toFixed(2)}">${(w*100).toFixed(0)}%</td>`;
+      }).join('') + '</tr>';
+    });
+    html += '</tbody>';
+    el.innerHTML = html;
+  }
+
+  function positionalEncoding(pos, d){
+    const v = [];
+    for(let i=0;i<d;i++){
+      const k = Math.floor(i/2);
+      const denom = Math.pow(10000, (2*k)/d);
+      v.push(i%2===0 ? Math.sin(pos/denom) : Math.cos(pos/denom));
+    }
+    return v;
+  }
+
+  function renderPositionalEncoding(){
+    document.getElementById('peRow1').innerHTML = vecRowHTML(positionalEncoding(1, D));
+    document.getElementById('peRow5').innerHTML = vecRowHTML(positionalEncoding(5, D));
+    const wordVec = embed(cleanWord('cat'), D);
+    const posVec = positionalEncoding(2, D);
+    const combined = wordVec.map((v,i)=>v+posVec[i]);
+    document.getElementById('peWordVec').innerHTML = vecRowHTML(wordVec);
+    document.getElementById('peVec2').innerHTML = vecRowHTML(posVec);
+    document.getElementById('peCombined').innerHTML = vecRowHTML(combined);
+  }
+
+  renderRnnPathDiagram('pathRnn');
+  renderTransformerDiagram('pathTransformer');
+  renderAlignGrid();
+  renderPositionalEncoding();
+
+  // ============================================================
+  // §9 Generation engine — WORD-level n-gram
+  // ============================================================
+  function tokenizeWords(text){ return (text.toLowerCase().match(/[a-z']+|[.,!?;]/g) || []); }
+  function detokFragment(prevTok, tok){
+    if(prevTok===null) return tok;
+    if(/^[.,!?;]$/.test(tok)) return tok;
+    return ' ' + tok;
+  }
+
+  const MAX_ORDER = 3, ALPHA = 0.15;
+
+  function buildModels(text){
+    const tokens = tokenizeWords(text);
+    const vocab = Array.from(new Set(tokens)).sort();
+    const uni = new Map();
+    for(const t of tokens) uni.set(t, (uni.get(t)||0)+1);
+    const models = {};
+    for(let order=1; order<=MAX_ORDER; order++){
+      const padded = Array(order).fill(' ').concat(tokens);
+      const counts = new Map();
+      for(let i=0;i<tokens.length;i++){
+        const ctx = padded.slice(i, i+order).join('');
+        const nxt = tokens[i];
+        if(!counts.has(ctx)) counts.set(ctx, new Map());
+        const m = counts.get(ctx);
+        m.set(nxt, (m.get(nxt)||0)+1);
+      }
+      models[order] = { vocab, counts, uni, order };
+    }
+    return { models, tokens, vocab };
+  }
+
+  function predictDist(model, ctxTokens, temperature){
+    const { vocab, counts, uni, order } = model;
+    const key = ctxTokens.slice(-order).join('');
+    const src = counts.get(key) || uni;
+    const total = vocab.reduce((s,w)=> s+(src.get(w)||0), 0);
+    const probs = vocab.map(w => ((src.get(w)||0)+ALPHA) / (total + ALPHA*vocab.length));
+    const powed = probs.map(p=>Math.pow(p, 1/Math.max(temperature,0.05)));
+    const sum = powed.reduce((a,b)=>a+b,0);
+    return vocab.map((w,i)=>({ w, p: powed[i]/sum }));
+  }
+
+  const CORPORA = {
+    catdog: "the cat sat on the mat. the dog sat on the rug. the cat chased the dog. the dog chased the cat.",
+    twinkle: "twinkle twinkle little star how i wonder what you are up above the world so high like a diamond in the sky. twinkle twinkle little star how i wonder what you are. when the blazing sun is gone, when he nothing shines upon, then you show your little light, twinkle twinkle all the night."
+  };
+  const PROMPTS = { catdog: "the cat", twinkle: "twinkle twinkle" };
+
+  const genState = { corpusKey:'catdog', order:3, bundle:null, ctx:[], generatedTokens:[], lastAdded:-1, playing:false, timer:null };
+
+  function rebuildModel(){
+    let text;
+    if(genState.corpusKey==='custom'){
+      text = document.getElementById('corpusCustomText').value.trim() || 'the quick fox jumps over the lazy dog.';
+    } else {
+      text = CORPORA[genState.corpusKey];
+    }
+    genState.bundle = buildModels(text);
+    const promptEl = document.getElementById('promptInput');
+    if(genState.corpusKey!=='custom'){
+      promptEl.value = PROMPTS[genState.corpusKey];
+    } else {
+      const words = tokenizeWords(text).filter(t=>!/^[.,!?;]$/.test(t));
+      promptEl.value = words.slice(0,2).join(' ') || '';
+    }
+    resetGeneration();
+  }
+
+  function resetGeneration(){
+    stopAutoplay();
+    const promptTokens = tokenizeWords(document.getElementById('promptInput').value);
+    genState.generatedTokens = promptTokens;
+    genState.ctx = Array(MAX_ORDER).fill(' ').concat(promptTokens);
+    genState.lastAdded = -1;
+    renderGenOutput();
+    renderProbBars(predictDist(genState.bundle.models[genState.order], genState.ctx, currentTemp()).sort((a,b)=>b.p-a.p));
+  }
+
+  function currentTemp(){ return parseFloat(document.getElementById('tempSlider').value); }
+  function currentDecode(){ return document.getElementById('decodeMode').querySelector('.active').dataset.v; }
+
+  function stepGeneration(){
+    const model = genState.bundle.models[genState.order];
+    const dist = predictDist(model, genState.ctx, currentTemp());
+    const sorted = [...dist].sort((a,b)=>b.p-a.p);
+    let chosen;
+    if(currentDecode()==='greedy'){
+      chosen = sorted[0].w;
+    } else {
+      let r = Math.random(), acc=0; chosen = sorted[sorted.length-1].w;
+      for(const d of sorted){ acc += d.p; if(r<=acc){ chosen=d.w; break; } }
+    }
+    genState.generatedTokens.push(chosen);
+    genState.lastAdded = genState.generatedTokens.length-1;
+    genState.ctx.push(chosen);
+    renderGenOutput();
+    renderProbBars(sorted, chosen);
+    if(genState.generatedTokens.length > 120) stopAutoplay();
+  }
+
+  function renderGenOutput(){
+    const el = document.getElementById('genOutput');
+    const toks = genState.generatedTokens;
+    let html = '';
+    toks.forEach((t,i)=>{
+      const frag = escapeHtml(detokFragment(i===0?null:toks[i-1], t));
+      html += (i===genState.lastAdded) ? `<span class="fresh">${frag}</span>` : frag;
+    });
+    el.innerHTML = html || '&nbsp;';
+  }
+
+  function renderProbBars(sortedDist, chosenW){
+    const top = sortedDist.slice(0,8);
+    const container = document.getElementById('probBars');
+    container.innerHTML = '';
+    top.forEach(({w,p})=>{
+      const row = document.createElement('div');
+      row.className = 'prob-row' + (w===chosenW ? ' chosen' : '');
+      row.innerHTML = `<div class="prob-w">${escapeHtml(w)}</div><div class="prob-track"><div class="prob-fill" style="width:${(p*100).toFixed(1)}%"></div></div><div class="prob-num">${(p*100).toFixed(1)}%</div>`;
+      container.appendChild(row);
+    });
+  }
+
+  function stopAutoplay(){
+    genState.playing = false;
+    if(genState.timer){ clearInterval(genState.timer); genState.timer=null; }
+    document.getElementById('playBtn').textContent = 'Auto-play';
+  }
+  function startAutoplay(){
+    genState.playing = true;
+    document.getElementById('playBtn').textContent = 'Stop';
+    genState.timer = setInterval(stepGeneration, 650);
+  }
+
+  document.getElementById('corpusMode').addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('active', b===btn));
+    genState.corpusKey = btn.dataset.v;
+    document.getElementById('corpusCustomRow').style.display = genState.corpusKey==='custom' ? 'block' : 'none';
+    rebuildModel();
+  });
+  document.getElementById('corpusCustomText').addEventListener('change', ()=>{ if(genState.corpusKey==='custom') rebuildModel(); });
+  document.getElementById('contextMode').addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('active', b===btn));
+    genState.order = parseInt(btn.dataset.v,10);
+    document.getElementById('lookbackCount').textContent = genState.order;
+    renderProbBars(predictDist(genState.bundle.models[genState.order], genState.ctx, currentTemp()).sort((a,b)=>b.p-a.p));
+  });
+  document.getElementById('decodeMode').addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('active', b===btn));
+    document.getElementById('sampleWarnNote').style.display = btn.dataset.v==='sample' ? 'block' : 'none';
+    renderProbBars(predictDist(genState.bundle.models[genState.order], genState.ctx, currentTemp()).sort((a,b)=>b.p-a.p));
+  });
+  document.getElementById('tempSlider').addEventListener('input', e=>{
+    document.getElementById('tempVal').textContent = parseFloat(e.target.value).toFixed(2);
+    renderProbBars(predictDist(genState.bundle.models[genState.order], genState.ctx, currentTemp()).sort((a,b)=>b.p-a.p));
+  });
+  document.getElementById('promptInput').addEventListener('change', resetGeneration);
+  document.getElementById('nextBtn').addEventListener('click', ()=>{ stopAutoplay(); stepGeneration(); });
+  document.getElementById('playBtn').addEventListener('click', ()=>{ genState.playing ? stopAutoplay() : startAutoplay(); });
+  document.getElementById('resetBtn').addEventListener('click', resetGeneration);
+
+  rebuildModel();
+
+  // ============================================================
+  // §10 Foundation Model engine — fixed illustrative prompt/completion pairs
+  // ============================================================
+  const FM_EXAMPLES = {
+    translate: { prompt: 'Translate to French: "The cat is sleeping."', completion: 'Le chat dort.' },
+    summarize: { prompt: 'Summarize in one sentence:\n"Photosynthesis is the process plants use to convert sunlight, water, and carbon dioxide into glucose and oxygen, mostly inside the chloroplasts of their cells."', completion: 'Plants use photosynthesis to turn sunlight, water, and CO2 into food and oxygen.' },
+    qa: { prompt: 'Q: What is the capital of Japan?', completion: 'A: Tokyo.' },
+    code: { prompt: 'Write a Python function that reverses a string.', completion: 'def reverse(s):\n    return s[::-1]' },
+  };
+
+  function renderFm(taskKey){
+    const ex = FM_EXAMPLES[taskKey];
+    document.getElementById('fmPrompt').textContent = ex.prompt;
+    document.getElementById('fmCompletion').textContent = ex.completion;
+  }
+
+  document.getElementById('fmTaskMode').addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('active', b===btn));
+    renderFm(btn.dataset.v);
+  });
+
+  renderFm('translate');
+
+  // ============================================================
+  // §11 Fine-tuning engine — same gradient descent as §4, different start
+  // ============================================================
+  const FT_X = 2, FT_Y = 12, FT_LR = 0.01, FT_MAX_STEPS = 10;
+  const FT_STARTS = { scratch: 0.5, pretrained: 2.3 };
+  const ftState = { mode:'scratch', w1:FT_STARTS.scratch, w2:FT_STARTS.scratch, history:[] };
+
+  function ftForwardBackward(w1, w2){
+    const h = FT_X*w1, pred = h*w2, err = pred-FT_Y, loss = err*err;
+    const dPred = 2*err, dW2 = dPred*h, dW1 = dPred*w2*FT_X;
+    return { h, pred, loss, dW1, dW2 };
+  }
+
+  function renderFtLossHistory(){
+    const container = document.getElementById('ftLossHistory');
+    container.innerHTML = '';
+    const first = ftState.history[0] || 1;
+    ftState.history.forEach((loss,i)=>{
+      const row = document.createElement('div');
+      row.className = 'prob-row';
+      const pct = Math.max(0.5, Math.min(100, (loss/first)*100));
+      row.innerHTML = `<div class="prob-w">step ${i+1}</div><div class="prob-track"><div class="prob-fill" style="width:${pct.toFixed(1)}%"></div></div><div class="prob-num">${loss.toFixed(3)}</div>`;
+      container.appendChild(row);
+    });
+  }
+
+  function renderFt(){
+    const r = ftForwardBackward(ftState.w1, ftState.w2);
+    document.getElementById('ftForward').innerHTML =
+      `w<sub>1</sub> = ${ftState.w1.toFixed(3)}, &nbsp;w<sub>2</sub> = ${ftState.w2.toFixed(3)}<br>` +
+      `prediction = x &middot; w<sub>1</sub> &middot; w<sub>2</sub> = <b>${r.pred.toFixed(3)}</b> &nbsp;(target = ${FT_Y})<br>` +
+      `loss = <b>${r.loss.toFixed(3)}</b>`;
+    renderFtLossHistory();
+    document.getElementById('ftStepBtn').disabled = ftState.history.length >= FT_MAX_STEPS;
+  }
+
+  function ftTrainStep(){
+    if(ftState.history.length >= FT_MAX_STEPS) return;
+    const r = ftForwardBackward(ftState.w1, ftState.w2);
+    ftState.history.push(r.loss);
+    ftState.w1 -= FT_LR*r.dW1;
+    ftState.w2 -= FT_LR*r.dW2;
+    renderFt();
+  }
+
+  document.getElementById('ftStartMode').addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('active', b===btn));
+    ftState.mode = btn.dataset.v;
+    ftState.w1 = FT_STARTS[ftState.mode];
+    ftState.w2 = FT_STARTS[ftState.mode];
+    ftState.history = [];
+    renderFt();
+  });
+  document.getElementById('ftStepBtn').addEventListener('click', ftTrainStep);
+  document.getElementById('ftResetBtn').addEventListener('click', ()=>{
+    ftState.w1 = FT_STARTS[ftState.mode];
+    ftState.w2 = FT_STARTS[ftState.mode];
+    ftState.history = [];
+    renderFt();
+  });
+
+  renderFt();
+
+  // ============================================================
+  // Scroll-spy for sidenav
+  // ============================================================
+  const navLinks = [...document.querySelectorAll('.sidenav-list a')];
+  const sections = navLinks.map(a => document.querySelector(a.getAttribute('href')));
+  const spy = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      const idx = sections.indexOf(entry.target);
+      if(idx<0) return;
+      if(entry.isIntersecting) navLinks.forEach((a,i)=>a.classList.toggle('active', i===idx));
+    });
+  }, { rootMargin: '-15% 0px -70% 0px', threshold:0 });
+  sections.forEach(s=>{ if(s) spy.observe(s); });
+  if(navLinks[0]) navLinks[0].classList.add('active');
+
+})();
+</script>
