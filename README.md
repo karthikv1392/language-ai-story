@@ -1,15 +1,22 @@
 # Language AI Story
 
-A teaching project on how language AI works, from a single neuron up to
-LLM-style text generation.
+A live course notebook on language AI and agentic AI, from a single
+neuron up to retrieval-augmented, multi-hop reasoning systems.
 
 **Live, interactive site:** https://karthikv1392.github.io/language-ai-story/
-([`index.html`](index.html)) — eleven hands-on stops (McCulloch-Pitts
-neuron, perceptron, multi-layer perceptron, backpropagation, embeddings,
-RNNs, self-attention, why Transformers replaced RNNs, token generation,
-foundation models, fine-tuning), each one computed live in the browser as
-you click, type, and drag. No detailed reading required — the interactions
-carry the teaching.
+([`index.html`](index.html)) — nineteen hands-on stops in two parts, each
+one computed live in the browser as you click, type, and drag. No detailed
+reading required — the interactions carry the teaching.
+
+**Part 1 · Language AI** — McCulloch-Pitts neuron, perceptron, multi-layer
+perceptron, backpropagation, embeddings, RNNs, encoder-decoder,
+self-attention, why Transformers replaced RNNs, token generation,
+foundation models, fine-tuning, instruction & chat tuning.
+
+**Part 2 · Agentic AI** — chunking, vector databases, retrieval, RAG,
+query rewriting, multi-hop RAG. All six share one small, real knowledge
+base (built from Part 1's own history) so retrieval results are honest
+and checkable by eye, not just plausible-looking.
 
 ## Companion scripts
 

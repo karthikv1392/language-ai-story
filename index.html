@@ -69,6 +69,9 @@
   .sidenav a:hover{ color:var(--ink); }
   .sidenav-note{ margin-top:22px; padding-left:17px; font-size:.78rem; color:var(--ink-soft); border-left:1px solid transparent; max-width:150px; }
   @media (max-width:820px){ .sidenav-note{ display:none; } }
+  .sidenav-divider{ font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); font-weight:700; padding:16px 0 6px 17px; }
+  .sidenav-divider:first-child{ padding-top:0; }
+  @media (max-width:820px){ .sidenav-divider{ display:none; } }
 
   main{ min-width:0; }
 
@@ -96,6 +99,38 @@
   .embed-map-wrap{ display:flex; justify-content:center; }
   .embed-map{ width:100%; max-width:380px; height:auto; }
   .embed-map text{ font-family:'JetBrains Mono',monospace; -webkit-user-select:none; user-select:none; }
+
+  /* ---------- RAG chapters (14-19) ---------- */
+  .chunk-output{ display:flex; flex-direction:column; gap:8px; }
+  .chunk-piece{ padding:10px 14px; border:1px solid var(--rule); font-size:.87rem; line-height:1.5; }
+  .chunk-piece:nth-child(odd){ background:var(--surface); }
+  .chunk-piece:nth-child(even){ background:var(--mark-soft); }
+
+  .kw-tags{ display:flex; flex-wrap:wrap; gap:6px; }
+  .kw-tag{ font-family:'JetBrains Mono',monospace; font-size:.72rem; border:1px solid var(--rule); padding:3px 8px; color:var(--ink-soft); }
+
+  .doc-table{ width:100%; border-collapse:collapse; font-size:.85rem; }
+  .doc-table th{ text-align:left; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); font-weight:600; padding-bottom:8px; border-bottom:1px solid var(--rule); }
+  .doc-table td{ padding:10px 12px 10px 0; border-bottom:1px solid var(--rule); vertical-align:top; }
+  .doc-table tr:last-child td{ border-bottom:none; }
+  .doc-table tr{ cursor:pointer; }
+  .doc-table tr:hover td{ color:var(--ink); }
+  .doc-table tr.open td{ color:var(--ink); }
+  .doc-table .doc-id{ font-family:'JetBrains Mono',monospace; color:var(--ink-soft); white-space:nowrap; }
+  .doc-snippet{ color:var(--ink-soft); }
+  .doc-table tr.open .doc-snippet{ color:var(--ink); }
+
+  .score-row{ padding:9px 0; border-bottom:1px solid var(--rule); }
+  .score-row:first-child{ border-top:1px solid var(--rule); }
+  .score-row.top .score-text{ color:var(--mark); font-weight:600; }
+  .score-text{ font-size:.85rem; margin-bottom:7px; }
+  .score-bottom{ display:flex; align-items:center; gap:10px; }
+  .score-track{ flex:1; height:10px; background:var(--grid-line); }
+  .score-fill{ height:100%; background:var(--mark); opacity:.7; }
+  .score-num{ font-size:.74rem; color:var(--ink-soft); font-variant-numeric:tabular-nums; width:2.4em; text-align:right; }
+
+  .context-box{ font-size:.87rem; background:var(--mark-soft); border:1px solid var(--rule); padding:14px 16px; line-height:1.5; }
+  .hop-badge{ display:inline-block; font-family:'JetBrains Mono',monospace; font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; color:var(--mark); border:1px solid var(--mark); padding:3px 9px; margin-bottom:10px; }
   .mp-neuron{ width:52px; height:52px; border-radius:50%; border:2.4px solid var(--rule); background:var(--surface); transition:background .15s, border-color .15s, box-shadow .15s; }
   .mp-neuron.firing{ background:var(--mark); border-color:var(--mark); box-shadow:0 0 0 6px var(--mark-soft); }
   .mp-output{ font-size:.8rem; font-weight:600; color:var(--ink-soft); }
@@ -279,6 +314,7 @@
   <div class="layout">
     <nav class="sidenav" aria-label="Stops">
       <div class="sidenav-list" id="sidenavList">
+        <div class="sidenav-divider">Part 1 &middot; Language AI</div>
         <a href="#mcculloch"><span class="num">01</span>McCulloch&#8209;Pitts Neuron</a>
         <a href="#perceptron"><span class="num">02</span>Perceptron</a>
         <a href="#mlp"><span class="num">03</span>Multi&#8209;Layer Perceptron</a>
@@ -292,6 +328,13 @@
         <a href="#foundation"><span class="num">11</span>Foundation Model</a>
         <a href="#finetune"><span class="num">12</span>Fine&#8209;tuning</a>
         <a href="#instructtune"><span class="num">13</span>Instruction &amp; Chat Tuning</a>
+        <div class="sidenav-divider">Part 2 &middot; Agentic AI</div>
+        <a href="#chunking"><span class="num">14</span>Chunking</a>
+        <a href="#vectordb"><span class="num">15</span>Vector Database</a>
+        <a href="#retrieval"><span class="num">16</span>Retrieval</a>
+        <a href="#rag"><span class="num">17</span>RAG</a>
+        <a href="#queryrewrite"><span class="num">18</span>Query Rewriting</a>
+        <a href="#multihop"><span class="num">19</span>Multi&#8209;hop RAG</a>
       </div>
       <div class="sidenav-note">More chapters land here as the notebook grows.</div>
     </nav>
@@ -853,6 +896,143 @@
           <div class="gen-output mono" id="itCompletion"></div>
         </div>
         <p class="diagram-caption" id="itCaption"></p>
+      </section>
+
+      <!-- ================= STOP 14 ================= -->
+      <section class="chapter" id="chunking">
+        <div class="chapter-head"><span class="chapter-num">14</span><h2>Chunking</h2></div>
+        <p class="chapter-intro">An embedding (Stop 5) works well for a word, or a sentence. Hand it a whole document and everything blurs into one mushy average. Hence: chunking — split a document into smaller pieces first, each one small enough to embed and search on its own.</p>
+
+        <div class="controls">
+          <div class="control">
+            <span class="control-label">Split by</span>
+            <div class="tabstrip" id="chunkMode">
+              <button data-v="sentence" class="active">Sentence</button>
+              <button data-v="8">~8 words</button>
+              <button data-v="20">~20 words</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="chunk-output" id="chunkOutput"></div>
+          <p class="diagram-caption" id="chunkCount" style="margin-top:14px;"></p>
+        </div>
+        <p class="diagram-caption">Split by sentence, this document breaks into exactly the six facts the next few stops search over. Chunk too small and you lose context; chunk too large and you're back to mushy averages — real systems tune this size carefully.</p>
+      </section>
+
+      <!-- ================= STOP 15 ================= -->
+      <section class="chapter" id="vectordb">
+        <div class="chapter-head"><span class="chapter-num">15</span><h2>Vector Database</h2></div>
+        <p class="chapter-intro">Once you have chunks, you need somewhere to store them so you can search fast later. Hence: a vector database — every chunk goes in alongside something to compare it against a future question. Real systems store an embedding vector (Stop 5) and index it for fast similarity search. This demo stores a simpler keyword fingerprint instead, so every match in the next few stops is easy to verify by eye — the search mechanic is identical either way.</p>
+
+        <div class="diagram-card">
+          <table class="doc-table" id="vdbTable">
+            <thead><tr><th style="width:2.2em;">#</th><th>Chunk</th><th style="width:34%;">Keyword fingerprint</th></tr></thead>
+            <tbody id="vdbBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= STOP 16 ================= -->
+      <section class="chapter" id="retrieval">
+        <div class="chapter-head"><span class="chapter-num">16</span><h2>Retrieval</h2></div>
+        <p class="chapter-intro">Storing chunks is only half the job — you need to find the right one fast. Hence: retrieval. Score every stored chunk against the question, using whatever similarity the database supports (embedding distance in a real system, shared keywords here), and return the best matches, ranked.</p>
+
+        <div class="controls">
+          <div class="control">
+            <span class="control-label">Question</span>
+            <div class="tabstrip" id="retQueryMode">
+              <button data-v="0" class="active">When was the Perceptron invented?</button>
+              <button data-v="1">What is Backpropagation?</button>
+              <button data-v="2">What replaced RNNs?</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="control-label" style="margin-bottom:10px;">Ranked by shared keywords</div>
+          <div id="retResults"></div>
+        </div>
+        <p class="diagram-caption">Real vector databases rank by embedding distance instead of word overlap — same idea (score everything, keep the top few), just comparing numbers instead of counting words.</p>
+      </section>
+
+      <!-- ================= STOP 17 ================= -->
+      <section class="chapter" id="rag">
+        <div class="chapter-head"><span class="chapter-num">17</span><h2>RAG</h2></div>
+        <p class="chapter-intro">Retrieval alone just finds text — it doesn't answer anything. <strong>R</strong>etrieval-<strong>A</strong>ugmented <strong>G</strong>eneration puts it to use: take the top retrieved chunk, paste it into the prompt alongside the question, and let the model answer from it instead of guessing from memory.</p>
+
+        <div class="controls">
+          <div class="control">
+            <span class="control-label">Generation</span>
+            <div class="tabstrip" id="ragMode">
+              <button data-v="without" class="active">Without RAG</button>
+              <button data-v="with">With RAG</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="control-label" style="margin-bottom:8px;">Question</div>
+          <div class="gen-output mono" id="ragQuestion" style="margin-bottom:18px;"></div>
+          <div id="ragContextBlock" style="display:none;">
+            <div class="hop-badge">Retrieved context</div>
+            <div class="context-box" id="ragContext" style="margin-bottom:18px;"></div>
+          </div>
+          <div class="control-label" style="margin-bottom:8px;">Answer</div>
+          <div class="gen-output mono" id="ragAnswer"></div>
+        </div>
+        <p class="diagram-caption" id="ragCaption"></p>
+      </section>
+
+      <!-- ================= STOP 18 ================= -->
+      <section class="chapter" id="queryrewrite">
+        <div class="chapter-head"><span class="chapter-num">18</span><h2>Query Rewriting</h2></div>
+        <p class="chapter-intro">The question a user actually types isn't always a good search query — vague, conversational, missing the context of what "that" even refers to. Hence: query rewriting. Use the model itself to rephrase the question into something retrieval can actually match, before searching.</p>
+
+        <div class="controls">
+          <div class="control">
+            <span class="control-label">Query</span>
+            <div class="tabstrip" id="qrMode">
+              <button data-v="original" class="active">Original</button>
+              <button data-v="rewritten">Rewritten</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="control-label" style="margin-bottom:8px;">Search query</div>
+          <div class="gen-output mono" id="qrQuery" style="margin-bottom:18px;"></div>
+          <div class="control-label" style="margin-bottom:10px;">Retrieval results</div>
+          <div id="qrResults"></div>
+        </div>
+        <p class="diagram-caption" id="qrCaption"></p>
+      </section>
+
+      <!-- ================= STOP 19 ================= -->
+      <section class="chapter" id="multihop">
+        <div class="chapter-head"><span class="chapter-num">19</span><h2>Multi&#8209;hop RAG</h2></div>
+        <p class="chapter-intro">Some questions can't be answered by one search. "What three vectors does the mechanism that replaced RNNs use?" needs two separate facts from two different chunks. Hence: multi-hop RAG — retrieve, use what you find to form a new query, retrieve again, and only then answer.</p>
+
+        <div class="diagram-card">
+          <div class="hop-badge" id="mhBadge"></div>
+          <div class="control-label" style="margin-bottom:8px;">Query</div>
+          <div class="gen-output mono" id="mhQuery" style="margin-bottom:18px;"></div>
+          <div id="mhResultBlock" style="display:none;">
+            <div class="control-label" style="margin-bottom:8px;">Top retrieved chunk</div>
+            <div class="context-box" id="mhResult" style="margin-bottom:18px;"></div>
+          </div>
+          <div id="mhAnswerBlock" style="display:none;">
+            <div class="control-label" style="margin-bottom:8px;">Final answer</div>
+            <div class="gen-output mono" id="mhAnswer"></div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn--solid" id="mhNextBtn">Next hop &rarr;</button>
+          <button class="btn" id="mhResetBtn">Reset</button>
+        </div>
+        <p class="diagram-caption">Real multi-hop systems let the model decide how many hops it needs and what each follow-up query should be — this demo hand-steps through two fixed hops so the chaining itself is easy to see.</p>
       </section>
 
     </main>
@@ -2010,6 +2190,177 @@
   });
 
   renderIt('base');
+
+  // ============================================================
+  // Shared RAG corpus + retrieval helpers (§14-19)
+  // ============================================================
+  const RAG_CORPUS = [
+    "The McCulloch-Pitts neuron (1943) was the first mathematical model of a neuron, using fixed weights and a threshold with no learning at all.",
+    "Frank Rosenblatt invented the Perceptron in 1958, the first neuron that could learn its own weights automatically from examples.",
+    "Backpropagation, popularized in 1986, generalized learning to multi-layer networks using the chain rule to update every weight.",
+    "Recurrent Neural Networks (RNNs) read a sequence one word at a time, carrying a hidden memory forward from each step to the next.",
+    "The Transformer architecture, introduced in 2017, replaced RNNs with self-attention, letting every word be processed in parallel instead of one at a time.",
+    "Self-attention compares every word to every other word using three vectors: a Query, a Key, and a Value.",
+  ];
+  const RAG_STOPWORDS = new Set("a an the is was were it in of to from with this that every one at by used uses use let using and each other no all what when did happen does do how many".split(' '));
+
+  function ragKeywords(text){
+    return (text.toLowerCase().match(/[a-z0-9'-]+/g) || []).filter(w => !RAG_STOPWORDS.has(w) && w.length>1);
+  }
+  function ragScore(query, chunk){
+    const qw = new Set(ragKeywords(query));
+    let s = 0;
+    ragKeywords(chunk).forEach(w => { if(qw.has(w)) s++; });
+    return s;
+  }
+  function ragRank(query){
+    return RAG_CORPUS.map((c,i)=>({ i, score: ragScore(query, c), text: c })).sort((a,b)=>b.score-a.score);
+  }
+  function ragKeywordTags(text){
+    return [...new Set(ragKeywords(text))];
+  }
+  function renderScoreRows(containerEl, ranked){
+    containerEl.innerHTML = '';
+    const top = Math.max(1, ranked[0]?.score || 1);
+    ranked.forEach((r,idx)=>{
+      const row = document.createElement('div');
+      row.className = 'score-row' + (idx===0 && r.score>0 ? ' top' : '');
+      const pct = Math.max(2, (r.score/top)*100);
+      row.innerHTML = `<div class="score-text">${escapeHtml(r.text)}</div><div class="score-bottom"><div class="score-track"><div class="score-fill" style="width:${pct}%"></div></div><div class="score-num">${r.score}</div></div>`;
+      containerEl.appendChild(row);
+    });
+  }
+
+  // ============================================================
+  // §14 Chunking engine
+  // ============================================================
+  function ragChunkBySentence(text){ return text.match(/[^.]+\.\s*/g).map(s=>s.trim()); }
+  function ragChunkByWords(text, n){
+    const words = text.split(/\s+/);
+    const out = [];
+    for(let i=0;i<words.length;i+=n) out.push(words.slice(i,i+n).join(' '));
+    return out;
+  }
+  function renderChunks(mode){
+    const doc = RAG_CORPUS.join(' ');
+    const chunks = mode==='sentence' ? ragChunkBySentence(doc) : ragChunkByWords(doc, parseInt(mode,10));
+    document.getElementById('chunkOutput').innerHTML = chunks.map(c=>`<div class="chunk-piece">${escapeHtml(c)}</div>`).join('');
+    document.getElementById('chunkCount').innerHTML = `&rarr; <b>${chunks.length}</b> chunk${chunks.length===1?'':'s'}`;
+  }
+  document.getElementById('chunkMode').addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('active', b===btn));
+    renderChunks(btn.dataset.v);
+  });
+  renderChunks('sentence');
+
+  // ============================================================
+  // §15 Vector Database engine
+  // ============================================================
+  function renderVdb(){
+    const tbody = document.getElementById('vdbBody');
+    tbody.innerHTML = '';
+    RAG_CORPUS.forEach((text,i)=>{
+      const tr = document.createElement('tr');
+      const tags = ragKeywordTags(text).slice(0,6).map(w=>`<span class="kw-tag">${escapeHtml(w)}</span>`).join('');
+      tr.innerHTML = `<td class="doc-id">c${i+1}</td><td class="doc-snippet">${escapeHtml(text)}</td><td><div class="kw-tags">${tags}</div></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+  renderVdb();
+
+  // ============================================================
+  // §16 Retrieval engine
+  // ============================================================
+  const RET_QUERIES = [
+    'When was the Perceptron invented?',
+    'What is Backpropagation?',
+    'What replaced RNNs?',
+  ];
+  function renderRetrieval(idx){
+    renderScoreRows(document.getElementById('retResults'), ragRank(RET_QUERIES[idx]));
+  }
+  document.getElementById('retQueryMode').addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('active', b===btn));
+    renderRetrieval(parseInt(btn.dataset.v,10));
+  });
+  renderRetrieval(0);
+
+  // ============================================================
+  // §17 RAG engine
+  // ============================================================
+  const RAG_QUESTION = 'When was the Perceptron invented?';
+  const RAG_ANSWERS = {
+    without: "I believe the Perceptron was invented sometime in the late 1950s or early 1960s, though I'm not fully certain of the exact year.",
+    with: 'According to the retrieved passage: Frank Rosenblatt invented the Perceptron in 1958.',
+  };
+  const RAG_CAPTIONS = {
+    without: "No retrieval happened — the model is guessing from whatever it absorbed during training, and it hedges because it isn't sure.",
+    with: "The top retrieved chunk (Stop 16's search, run automatically) was pasted straight into the prompt — the model just has to read it back correctly.",
+  };
+  function renderRag(mode){
+    document.getElementById('ragQuestion').textContent = RAG_QUESTION;
+    document.getElementById('ragContextBlock').style.display = mode==='with' ? 'block' : 'none';
+    if(mode==='with') document.getElementById('ragContext').textContent = ragRank(RAG_QUESTION)[0].text;
+    document.getElementById('ragAnswer').textContent = RAG_ANSWERS[mode];
+    document.getElementById('ragCaption').textContent = RAG_CAPTIONS[mode];
+  }
+  document.getElementById('ragMode').addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('active', b===btn));
+    renderRag(btn.dataset.v);
+  });
+  renderRag('without');
+
+  // ============================================================
+  // §18 Query Rewriting engine
+  // ============================================================
+  const QR_QUERIES = {
+    original: 'When did that happen?',
+    rewritten: 'When was the Transformer architecture introduced?',
+  };
+  const QR_CAPTIONS = {
+    original: 'Shares no meaningful keywords with any chunk — every score ties at zero. Retrieval has nothing to go on.',
+    rewritten: 'Naming the actual subject ("Transformer architecture") gives retrieval real keywords to match — one chunk now stands out clearly.',
+  };
+  function renderQr(mode){
+    document.getElementById('qrQuery').textContent = QR_QUERIES[mode];
+    renderScoreRows(document.getElementById('qrResults'), ragRank(QR_QUERIES[mode]));
+    document.getElementById('qrCaption').textContent = QR_CAPTIONS[mode];
+  }
+  document.getElementById('qrMode').addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('active', b===btn));
+    renderQr(btn.dataset.v);
+  });
+  renderQr('original');
+
+  // ============================================================
+  // §19 Multi-hop RAG engine
+  // ============================================================
+  const MH_STEPS = [
+    { badge: 'Question', query: 'What three vectors does the mechanism that replaced RNNs use?', result: false, answer: null },
+    { badge: "Hop 1 · query", query: 'What mechanism replaced RNNs and works in parallel?', result: true, answer: null },
+    { badge: 'Hop 2 · query (built from hop 1’s finding: "self-attention")', query: 'What three vectors does self-attention use?', result: true, answer: null },
+    { badge: 'Final answer', query: 'What three vectors does self-attention use?', result: true, answer: 'Self-attention — the mechanism that replaced RNNs — uses three vectors: a Query, a Key, and a Value.' },
+  ];
+  let mhStep = 0;
+  function renderMh(){
+    const s = MH_STEPS[mhStep];
+    document.getElementById('mhBadge').textContent = s.badge;
+    document.getElementById('mhQuery').textContent = s.query;
+    document.getElementById('mhResultBlock').style.display = s.result ? 'block' : 'none';
+    if(s.result) document.getElementById('mhResult').textContent = ragRank(s.query)[0].text;
+    document.getElementById('mhAnswerBlock').style.display = s.answer ? 'block' : 'none';
+    if(s.answer) document.getElementById('mhAnswer').textContent = s.answer;
+    document.getElementById('mhNextBtn').disabled = mhStep >= MH_STEPS.length-1;
+  }
+  document.getElementById('mhNextBtn').addEventListener('click', ()=>{
+    if(mhStep < MH_STEPS.length-1){ mhStep++; renderMh(); }
+  });
+  document.getElementById('mhResetBtn').addEventListener('click', ()=>{ mhStep=0; renderMh(); });
+  renderMh();
 
   // ============================================================
   // Scroll-spy for sidenav
