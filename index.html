@@ -106,9 +106,6 @@
   .chunk-piece:nth-child(odd){ background:var(--surface); }
   .chunk-piece:nth-child(even){ background:var(--mark-soft); }
 
-  .kw-tags{ display:flex; flex-wrap:wrap; gap:6px; }
-  .kw-tag{ font-family:'JetBrains Mono',monospace; font-size:.72rem; border:1px solid var(--rule); padding:3px 8px; color:var(--ink-soft); }
-
   .doc-table{ width:100%; border-collapse:collapse; font-size:.85rem; }
   .doc-table th{ text-align:left; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); font-weight:600; padding-bottom:8px; border-bottom:1px solid var(--rule); }
   .doc-table td{ padding:10px 12px 10px 0; border-bottom:1px solid var(--rule); vertical-align:top; }
@@ -924,14 +921,15 @@
       <!-- ================= STOP 15 ================= -->
       <section class="chapter" id="vectordb">
         <div class="chapter-head"><span class="chapter-num">15</span><h2>Vector Database</h2></div>
-        <p class="chapter-intro">Once you have chunks, you need somewhere to store them so you can search fast later. Hence: a vector database — every chunk goes in alongside something to compare it against a future question. Real systems store an embedding vector (Stop 5) and index it for fast similarity search. This demo stores a simpler keyword fingerprint instead, so every match in the next few stops is easy to verify by eye — the search mechanic is identical either way.</p>
+        <p class="chapter-intro">Once you have chunks, you need somewhere to store them so you can search fast later. Hence: a vector database — every chunk gets embedded (Stop 5) into a vector and stored alongside its original text, ready to compare against a future question.</p>
 
         <div class="diagram-card">
           <table class="doc-table" id="vdbTable">
-            <thead><tr><th style="width:2.2em;">#</th><th>Chunk</th><th style="width:34%;">Keyword fingerprint</th></tr></thead>
+            <thead><tr><th style="width:2.2em;">#</th><th>Chunk</th><th style="width:38%;">Embedding vector</th></tr></thead>
             <tbody id="vdbBody"></tbody>
           </table>
         </div>
+        <p class="diagram-caption">These vectors are real — each one is the average of its chunk's word embeddings, computed the same way as Stop 5's. But since nothing on this page is actually trained, comparing these numbers directly wouldn't reliably surface the right chunk. The retrieval stops that follow rank by shared keywords instead — same search mechanic, score everything and keep the best, just swapped in for a scoring method you can verify by eye.</p>
       </section>
 
       <!-- ================= STOP 16 ================= -->
@@ -2216,9 +2214,6 @@
   function ragRank(query){
     return RAG_CORPUS.map((c,i)=>({ i, score: ragScore(query, c), text: c })).sort((a,b)=>b.score-a.score);
   }
-  function ragKeywordTags(text){
-    return [...new Set(ragKeywords(text))];
-  }
   function renderScoreRows(containerEl, ranked){
     containerEl.innerHTML = '';
     const top = Math.max(1, ranked[0]?.score || 1);
@@ -2257,13 +2252,19 @@
   // ============================================================
   // §15 Vector Database engine
   // ============================================================
+  function ragChunkVector(text){
+    const words = ragKeywords(text);
+    const sum = new Array(D).fill(0);
+    words.forEach(w=>{ const v = embed(w, D); for(let i=0;i<D;i++) sum[i]+=v[i]; });
+    return sum.map(v=>v/words.length);
+  }
   function renderVdb(){
     const tbody = document.getElementById('vdbBody');
     tbody.innerHTML = '';
     RAG_CORPUS.forEach((text,i)=>{
       const tr = document.createElement('tr');
-      const tags = ragKeywordTags(text).slice(0,6).map(w=>`<span class="kw-tag">${escapeHtml(w)}</span>`).join('');
-      tr.innerHTML = `<td class="doc-id">c${i+1}</td><td class="doc-snippet">${escapeHtml(text)}</td><td><div class="kw-tags">${tags}</div></td>`;
+      const vec = ragChunkVector(text);
+      tr.innerHTML = `<td class="doc-id">c${i+1}</td><td class="doc-snippet">${escapeHtml(text)}</td><td><div class="vec-row">${vecRowHTML(vec)}</div></td>`;
       tbody.appendChild(tr);
     });
   }
