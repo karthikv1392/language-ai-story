@@ -173,7 +173,7 @@
   .note{ font-size:.82rem; color:var(--ink-soft); border-left:2px solid var(--rule); padding:2px 0 2px 13px; margin:4px 0 22px; max-width:66ch; }
   .note strong{ color:var(--ink); }
 
-  /* ---------- §7 sentence + weights ---------- */
+  /* ---------- §8 sentence + weights ---------- */
   .token-strip{ margin:2px 0 20px; line-height:2.3; }
   .token{
     background:none; border:none; font-size:.92rem; color:var(--ink-soft); cursor:pointer; padding:2px 1px;
@@ -241,7 +241,7 @@
   .heat-grid{ display:grid; gap:2px; }
   .heat-cell{ aspect-ratio:1; }
 
-  /* ---------- §9 generation ---------- */
+  /* ---------- §10 generation ---------- */
   .gen-output{
     font-size:1rem; line-height:1.9; min-height:5em;
     background:var(--surface); border:1px solid var(--rule); padding:16px 18px; margin-bottom:18px;
@@ -272,7 +272,7 @@
   <div class="masthead">
     <div class="kicker">Companion to the LLM code demo</div>
     <h1>Language AI Story</h1>
-    <p>One story, told from the ground up: how do you get a machine to reliably predict what comes next in a sequence? Every stop below is a live, hands-on model — computed right here in your browser — building one step closer to that answer, from a single neuron that can barely decide AND vs. OR, up to a foundation model generating real text and getting fine-tuned for a job of its own.</p>
+    <p>One story, told from the ground up: how do you get a machine to reliably predict what comes next in a sequence? Every stop below is a live, hands-on model — computed right here in your browser — building one step closer to that answer, from a single neuron that can barely decide AND vs. OR, up to a foundation model generating real text and getting fine-tuned into something like ChatGPT.</p>
     <p class="roadmap">This page is a running notebook — stops land here as they're built.</p>
   </div>
 
@@ -285,11 +285,13 @@
         <a href="#backprop"><span class="num">04</span>Backpropagation</a>
         <a href="#embeddings"><span class="num">05</span>Embeddings</a>
         <a href="#rnn"><span class="num">06</span>How RNNs Read</a>
-        <a href="#attention"><span class="num">07</span>Self&#8209;Attention</a>
-        <a href="#history"><span class="num">08</span>Before Transformers</a>
-        <a href="#generation"><span class="num">09</span>Token Generation</a>
-        <a href="#foundation"><span class="num">10</span>Foundation Model</a>
-        <a href="#finetune"><span class="num">11</span>Fine&#8209;tuning</a>
+        <a href="#encdec"><span class="num">07</span>Encoder&#8209;Decoder</a>
+        <a href="#attention"><span class="num">08</span>Self&#8209;Attention</a>
+        <a href="#history"><span class="num">09</span>Before Transformers</a>
+        <a href="#generation"><span class="num">10</span>Token Generation</a>
+        <a href="#foundation"><span class="num">11</span>Foundation Model</a>
+        <a href="#finetune"><span class="num">12</span>Fine&#8209;tuning</a>
+        <a href="#instructtune"><span class="num">13</span>Instruction &amp; Chat Tuning</a>
       </div>
       <div class="sidenav-note">More chapters land here as the notebook grows.</div>
     </nav>
@@ -508,8 +510,32 @@
       </section>
 
       <!-- ================= CHAPTER 7 ================= -->
+      <section class="chapter" id="encdec">
+        <div class="chapter-head"><span class="chapter-num">07</span><h2>Encoder&#8209;Decoder</h2></div>
+        <p class="chapter-intro">An RNN can read a sequence and keep a memory of it — but some jobs need to turn <strong>one</strong> sequence into a completely <strong>different</strong> one, like translating English into Italian. A plain RNN has no natural way to do that. Hence: the <strong>encoder&#8209;decoder</strong>. One RNN (the encoder) reads the whole input and hands off a single summary vector. A second RNN (the decoder) starts <em>from that handoff</em> and generates a brand new sequence, one word at a time.</p>
+
+        <div class="diagram-card">
+          <div class="control-label" style="margin-bottom:8px;">Source (English) — the encoder reads this</div>
+          <div class="rnn-token-strip" id="edSourceStrip"></div>
+          <div class="control-label" style="margin:22px 0 8px;">Target (Italian) — the decoder writes this</div>
+          <div class="rnn-token-strip" id="edTargetStrip"></div>
+
+          <div class="control-label" id="edStateLabel" style="margin:22px 0 8px;"></div>
+          <div class="vec-row" id="edHiddenState"></div>
+          <p class="diagram-caption" id="edStepCaption" style="margin-top:14px;"></p>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn--solid" id="edNextBtn">Next step &rarr;</button>
+          <button class="btn" id="edResetBtn">Reset</button>
+        </div>
+
+        <p class="diagram-caption" style="margin-top:20px;">That single handoff vector is a real bottleneck — the decoder has to work from one fixed summary of everything the encoder read, no matter how long the input was. What if the decoder could look back at every encoder step instead of just the last one? That's exactly what attention adds, coming up next.</p>
+      </section>
+
+      <!-- ================= CHAPTER 8 ================= -->
       <section class="chapter" id="attention">
-        <div class="chapter-head"><span class="chapter-num">07</span><h2>Self-Attention</h2></div>
+        <div class="chapter-head"><span class="chapter-num">08</span><h2>Self-Attention</h2></div>
         <p class="chapter-intro">Before a model can understand a sentence, every word needs to figure out <strong>which other words to pay attention to.</strong> Self-attention is the mechanism that computes this, for every word, all at once.</p>
 
         <div class="qkv-row">
@@ -612,10 +638,10 @@
         </div>
       </section>
 
-      <!-- ================= CHAPTER 8 ================= -->
+      <!-- ================= CHAPTER 9 ================= -->
       <section class="chapter" id="history">
-        <div class="chapter-head"><span class="chapter-num">08</span><h2>Before Transformers</h2></div>
-        <p class="chapter-intro">Attention didn't start with Transformers. It was invented in 2014&ndash;15, bolted onto the RNN, to fix a specific problem: the one hidden state that RNN ends on has to represent the <em>entire</em> sentence, and every step has to wait for the one before it &mdash; no shortcuts, no jumping ahead. Transformers (2017) then asked a bolder question: what if we kept the attention and threw the RNN away entirely?</p>
+        <div class="chapter-head"><span class="chapter-num">09</span><h2>Before Transformers</h2></div>
+        <p class="chapter-intro">Attention didn't start with Transformers. It was invented in 2014&ndash;15, bolted onto the encoder-decoder RNN we just built, to fix exactly the bottleneck it has: the decoder only ever gets one fixed handoff vector, and every step has to wait for the one before it &mdash; no shortcuts, no jumping ahead. Transformers (2017) then asked a bolder question: what if we kept the attention and threw the RNN away entirely?</p>
 
         <h3 class="subhead">The 2014&ndash;15 fix: don't throw the earlier states away</h3>
         <p class="chapter-intro">Bahdanau's and Luong's insight: keep <em>every</em> hidden state, not just the last one. While producing each output word, compute a score between what you're generating now and <em>every</em> input hidden state, softmax those into weights, and blend accordingly. That's the same score &rarr; softmax &rarr; weighted-blend recipe from self-attention — just comparing a decoder step against another sequence's hidden states, instead of a word against words in its own sentence. That distinction has a name: this is <strong>cross-attention</strong> (one sequence attending to a different one), not self-attention (a sequence attending to itself). Transformers use both.</p>
@@ -685,9 +711,9 @@
         </div>
       </section>
 
-      <!-- ================= CHAPTER 9 ================= -->
+      <!-- ================= CHAPTER 10 ================= -->
       <section class="chapter" id="generation">
-        <div class="chapter-head"><span class="chapter-num">09</span><h2>Token Generation</h2></div>
+        <div class="chapter-head"><span class="chapter-num">10</span><h2>Token Generation</h2></div>
         <p class="chapter-intro">This model reads <strong>whole words</strong>, not letters. At every step it looks at the last few words and produces a probability for every word it might say next — built instantly from the text below. Press <strong>Next word</strong> to run the loop a real LLM runs: predict &rarr; choose &rarr; append &rarr; repeat.</p>
 
         <div class="controls">
@@ -747,9 +773,9 @@
         <p class="note" id="sampleWarnNote" style="display:none; margin-top:16px;">With only a few dozen words of training text, <strong>Sample</strong> mode has very little to draw on and can turn to noise fast — that's a real, honest limitation of small data, not a bug. Real LLMs avoid it by training on billions of words. Try pasting in a longer paragraph of your own, or switch back to Greedy.</p>
       </section>
 
-      <!-- ================= STOP 10 ================= -->
+      <!-- ================= STOP 11 ================= -->
       <section class="chapter" id="foundation">
-        <div class="chapter-head"><span class="chapter-num">10</span><h2>Foundation Model</h2></div>
+        <div class="chapter-head"><span class="chapter-num">11</span><h2>Foundation Model</h2></div>
         <p class="chapter-intro">Predicting the next word, one token at a time on a tiny paragraph — that's the same trick behind real foundation models, just scaled up to trillions of words. At that scale, something new shows up: the same frozen weights can do almost anything, just by changing what you ask.</p>
 
         <div class="controls">
@@ -774,9 +800,9 @@
         <p class="diagram-caption">Same weights, four different jobs, nothing retrained in between — that's the "foundation" in foundation model: one general-purpose base, redirected entirely through the prompt.</p>
       </section>
 
-      <!-- ================= STOP 11 ================= -->
+      <!-- ================= STOP 12 ================= -->
       <section class="chapter" id="finetune">
-        <div class="chapter-head"><span class="chapter-num">11</span><h2>Fine&#8209;tuning</h2></div>
+        <div class="chapter-head"><span class="chapter-num">12</span><h2>Fine&#8209;tuning</h2></div>
         <p class="chapter-intro">Prompting alone has limits. Fine-tuning goes back to real training — backpropagation, exactly the same algorithm — but starting from the foundation model's already-good weights instead of zero, and updating them on a small, focused dataset.</p>
 
         <div class="controls">
@@ -802,6 +828,31 @@
         <div class="control-label" style="margin:26px 0 10px;">Loss, step by step</div>
         <div class="prob-bars" id="ftLossHistory"></div>
         <p class="diagram-caption">Same gradient descent, same target — starting from pretrained weights instead of zero just needs far fewer steps to get there. That's the entire economic case for fine-tuning instead of training from scratch.</p>
+      </section>
+
+      <!-- ================= STOP 13 ================= -->
+      <section class="chapter" id="instructtune">
+        <div class="chapter-head"><span class="chapter-num">13</span><h2>Instruction &amp; Chat Tuning</h2></div>
+        <p class="chapter-intro">A raw foundation model just continues text — it was only ever trained to predict the next word, so it treats a question as something to keep writing, not something to answer. Fine-tuning fixes that in two stages. <strong>Instruction-tuning</strong>: train on (instruction &rarr; response) pairs, so it learns to answer instead of continue. <strong>Chat-tuning</strong>: train further on multi-turn conversations (often refined with human feedback, called RLHF), so it learns to be genuinely helpful, not just correct. This two-stage recipe is roughly how a base model like GPT becomes an assistant like ChatGPT.</p>
+
+        <div class="controls">
+          <div class="control">
+            <span class="control-label">Same prompt, after&hellip;</span>
+            <div class="tabstrip" id="itStageMode">
+              <button data-v="base" class="active">Nothing (base model)</button>
+              <button data-v="instruct">Instruction-tuning</button>
+              <button data-v="chat">Chat-tuning</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="diagram-card">
+          <div class="control-label" style="margin-bottom:8px;">Prompt</div>
+          <div class="gen-output mono" id="itPrompt" style="margin-bottom:18px;"></div>
+          <div class="control-label" style="margin-bottom:8px;">Completion</div>
+          <div class="gen-output mono" id="itCompletion"></div>
+        </div>
+        <p class="diagram-caption" id="itCaption"></p>
       </section>
 
     </main>
@@ -1288,7 +1339,91 @@
   renderRnnStep();
 
   // ============================================================
-  // §7 Attention engine
+  // §7 Encoder-Decoder engine — encoder reuses §6's RNN weights,
+  // decoder gets its own, starting state = encoder's final state
+  // ============================================================
+  const ED_SOURCE = CHAIN_WORDS.slice(0,3);
+  const ED_TARGET = ['il','gatto','nero'];
+  const ED_DEC_WX = randMatrix(D, D, 701, 1.3);
+  const ED_DEC_WH = randMatrix(D, D, 702, 1.3);
+
+  function edStepHidden(h, word, wx, wh){
+    const x = embed(cleanWord(word), D);
+    const a = vecMatMul(x, wx), b = vecMatMul(h, wh);
+    return a.map((v,i)=>Math.tanh(v+b[i]));
+  }
+
+  function edComputeStates(){
+    const states = [new Array(D).fill(0)];
+    let h = states[0];
+    ED_SOURCE.forEach(w=>{ h = edStepHidden(h, w, RNN_WX, RNN_WH); states.push(h); });
+    states.push(h.slice()); // handoff: decoder starts from encoder's final state
+    let hd = h.slice();
+    ED_TARGET.forEach(w=>{ hd = edStepHidden(hd, w, ED_DEC_WX, ED_DEC_WH); states.push(hd); });
+    return states; // [enc0, enc1, enc2, enc3, handoff, dec1, dec2, dec3] — 8 states
+  }
+  const ED_STATES = edComputeStates();
+  const edState = { step: 0 };
+
+  function renderEdStep(){
+    const srcStrip = document.getElementById('edSourceStrip');
+    srcStrip.innerHTML = '';
+    ED_SOURCE.forEach((w,i)=>{
+      const span = document.createElement('span');
+      let cls = 'rnn-token';
+      if(edState.step >= 4) cls += ' read';
+      else if(i < edState.step-1) cls += ' read';
+      else if(i === edState.step-1) cls += ' current';
+      span.className = cls;
+      span.textContent = w;
+      srcStrip.appendChild(span);
+    });
+
+    const tgtStrip = document.getElementById('edTargetStrip');
+    tgtStrip.innerHTML = '';
+    const decodeStep = edState.step - 4;
+    ED_TARGET.forEach((w,i)=>{
+      const span = document.createElement('span');
+      let cls = 'rnn-token';
+      if(decodeStep > i+1) cls += ' read';
+      else if(decodeStep === i+1) cls += ' current';
+      span.className = cls;
+      span.textContent = w;
+      tgtStrip.appendChild(span);
+    });
+
+    document.getElementById('edHiddenState').innerHTML = vecRowHTML(ED_STATES[edState.step]);
+
+    let phaseLabel, caption;
+    if(edState.step === 0){
+      phaseLabel = 'Encoder hidden state';
+      caption = 'Before reading anything — starts at all zeros, same as any RNN.';
+    } else if(edState.step <= 3){
+      phaseLabel = 'Encoder hidden state';
+      caption = `Encoding: just read "${ED_SOURCE[edState.step-1]}".`;
+    } else if(edState.step === 4){
+      phaseLabel = "Handoff — decoder's starting state";
+      caption = "Handoff: the encoder's final state is copied over as the decoder's starting memory — not zero. This is the only thing the decoder knows about the source sentence.";
+    } else {
+      phaseLabel = 'Decoder hidden state';
+      caption = `Decoding: just generated "${ED_TARGET[edState.step-5]}".`;
+    }
+    document.getElementById('edStateLabel').textContent = phaseLabel;
+    document.getElementById('edStepCaption').textContent = caption;
+    document.getElementById('edNextBtn').disabled = edState.step >= 7;
+  }
+
+  document.getElementById('edNextBtn').addEventListener('click', ()=>{
+    if(edState.step < 7){ edState.step++; renderEdStep(); }
+  });
+  document.getElementById('edResetBtn').addEventListener('click', ()=>{
+    edState.step = 0; renderEdStep();
+  });
+
+  renderEdStep();
+
+  // ============================================================
+  // §8 Attention engine
   // ============================================================
   const Wq = randMatrix(D,D,11), Wk = randMatrix(D,D,22), Wv = randMatrix(D,D,33);
   const WqH = Array.from({length:HEADS}, (_,h)=>randMatrix(D,DH,101+h));
@@ -1481,7 +1616,7 @@
   renderAttention();
 
   // ============================================================
-  // §8 Before Transformers — static diagrams + alignment grid
+  // §9 Before Transformers — static diagrams + alignment grid
   // ============================================================
   function renderRnnPathDiagram(elId){
     const n = CHAIN_WORDS.length, r = 10, gap = 54, x0 = 12, y = 30;
@@ -1587,7 +1722,7 @@
   renderPositionalEncoding();
 
   // ============================================================
-  // §9 Generation engine — WORD-level n-gram
+  // §10 Generation engine — WORD-level n-gram
   // ============================================================
   function tokenizeWords(text){ return (text.toLowerCase().match(/[a-z']+|[.,!?;]/g) || []); }
   function detokFragment(prevTok, tok){
@@ -1755,7 +1890,7 @@
   rebuildModel();
 
   // ============================================================
-  // §10 Foundation Model engine — fixed illustrative prompt/completion pairs
+  // §11 Foundation Model engine — fixed illustrative prompt/completion pairs
   // ============================================================
   const FM_EXAMPLES = {
     translate: { prompt: 'Translate to French: "The cat is sleeping."', completion: 'Le chat dort.' },
@@ -1779,7 +1914,7 @@
   renderFm('translate');
 
   // ============================================================
-  // §11 Fine-tuning engine — same gradient descent as §4, different start
+  // §12 Fine-tuning engine — same gradient descent as §4, different start
   // ============================================================
   const FT_X = 2, FT_Y = 12, FT_LR = 0.01, FT_MAX_STEPS = 10;
   const FT_STARTS = { scratch: 0.5, pretrained: 2.3 };
@@ -1841,6 +1976,40 @@
   });
 
   renderFt();
+
+  // ============================================================
+  // §13 Instruction & Chat Tuning engine — fixed illustrative completions
+  // ============================================================
+  const IT_PROMPT = 'Explain photosynthesis.';
+  const IT_EXAMPLES = {
+    base: {
+      completion: 'Explain photosynthesis in one paragraph. Explain photosynthesis to a 5th grader. Explain photosynthesis using a factory analogy. Explain—',
+      caption: 'A base model just predicts likely next text. A question looks like the start of a list of similar prompts, so it keeps writing more prompts instead of answering.',
+    },
+    instruct: {
+      completion: 'Photosynthesis is the process plants use to convert sunlight, water, and carbon dioxide into glucose and oxygen.',
+      caption: 'After instruction-tuning, the model has seen thousands of (instruction → response) pairs — it now recognises this as something to answer, directly.',
+    },
+    chat: {
+      completion: 'Sure! Photosynthesis is how plants make their own food using sunlight, water, and carbon dioxide, releasing oxygen as a byproduct. Want the chemical equation, or a simpler analogy?',
+      caption: 'After chat-tuning, the same underlying model is warmer and offers a next step — this conversational layer on top of instruction-tuning is most of what makes ChatGPT feel like ChatGPT.',
+    },
+  };
+
+  function renderIt(stageKey){
+    const ex = IT_EXAMPLES[stageKey];
+    document.getElementById('itPrompt').textContent = IT_PROMPT;
+    document.getElementById('itCompletion').textContent = ex.completion;
+    document.getElementById('itCaption').textContent = ex.caption;
+  }
+
+  document.getElementById('itStageMode').addEventListener('click', e=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...e.currentTarget.children].forEach(b=>b.classList.toggle('active', b===btn));
+    renderIt(btn.dataset.v);
+  });
+
+  renderIt('base');
 
   // ============================================================
   // Scroll-spy for sidenav
